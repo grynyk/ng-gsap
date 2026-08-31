@@ -1,43 +1,53 @@
 <h1>ng-gsap</h1>
-<p class="lede">A signals-first wrapper for using GSAP in Angular, in the spirit of <code>@gsap/react</code>.</p>
+<p class="lede">Signals-first GSAP for Angular.</p>
 
-<p>
-  <code>@gsap/react</code>'s <code>useGSAP</code> hook takes a manual dependency array, same as
-  <code>useEffect</code>. Angular doesn't need that — an <code>effect()</code> already auto-tracks every
-  signal read inside it. So the core primitive, <code>injectGSAP()</code>, wraps your animation callback in
-  an effect: read a signal inside the callback and it becomes a live dependency automatically.
+<p class="intro">
+  GSAP does the animating. This library handles the part that's tedious in a component: knowing
+  <em>when</em> to re-run an animation, and cleaning up what it made.
 </p>
 
-<app-code-preview [code]="snippet" />
+<app-code-preview [code]="snippet" title="box.ts" />
 
-<h2>Explore the examples</h2>
-<div class="grid">
-  <a routerLink="/basic-tween" class="card link-card">
-    <strong>Basic tween</strong>
-    <span>injectGSAP + scope, auto-tracked signal dependencies</span>
-  </a>
-  <a routerLink="/hover" class="card link-card">
-    <strong>Hover directive</strong>
-    <span>Declarative [gsapHover], auto-reverse on leave</span>
-  </a>
-  <a routerLink="/timeline" class="card link-card">
-    <strong>Timeline composition</strong>
-    <span>Children join a parent timeline via DI, no manual wiring</span>
-  </a>
-  <a routerLink="/scroll-progress" class="card link-card">
-    <strong>ScrollTrigger progress</strong>
-    <span>injectScrollTrigger driving signals, zoneless-friendly</span>
-  </a>
-  <a routerLink="/scrubber" class="card link-card">
-    <strong>Two-way scrubber</strong>
-    <span>gsapScrub binds a signal to a timeline both ways</span>
-  </a>
-  <a routerLink="/svg-draw" class="card link-card">
-    <strong>SVG draw-in</strong>
-    <span>Line-drawing animation with plain gsap.to()</span>
-  </a>
-  <a routerLink="/list" class="card link-card">
-    <strong>Signal-driven list</strong>
-    <span>GSAP enter/leave as an Angular Animations replacement</span>
-  </a>
+<p class="intro">
+  Nothing above declares what the animation depends on. Angular already tracks the signals you read,
+  so reading <code>open()</code> inside the callback is enough — flip it and the animation re-runs,
+  with the previous run already reverted.
+</p>
+
+<div class="pitch">
+  <div class="pitch-item">
+    <strong>Nothing to declare</strong>
+    <span
+      >Dependencies come from the signals you actually read. No list to write or keep in sync.</span
+    >
+  </div>
+  <div class="pitch-item">
+    <strong>Nothing to clean up</strong>
+    <span>Every tween the callback makes is reverted before it re-runs, and again on destroy.</span>
+  </div>
+  <div class="pitch-item">
+    <strong>Safe to server-render</strong>
+    <span>Runs in the render phase, which never executes on the server. No platform checks.</span>
+  </div>
+  <div class="pitch-item">
+    <strong>Built for zoneless</strong>
+    <span>GSAP's ticker stays out of Angular; signals notify the template directly.</span>
+  </div>
 </div>
+
+<div class="cta">
+  <a class="btn btn-accent" routerLink="/docs/getting-started">Get started</a>
+  <a class="btn" routerLink="/docs/api">API reference</a>
+</div>
+
+@for (section of sections; track section.title) {
+  <h2>{{ section.title }}</h2>
+  <div class="grid">
+    @for (item of section.items; track item.path) {
+      <a [routerLink]="item.path" class="card link-card">
+        <strong>{{ item.label }}</strong>
+        <span>{{ item.summary }}</span>
+      </a>
+    }
+  </div>
+}

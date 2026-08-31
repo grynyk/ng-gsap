@@ -1,0 +1,23 @@
+<app-example-page title="Flip grid" source="flip-grid" entryPoint="ng-gsap + gsap/Flip">
+  <p>
+    <code>Flip</code> (also free in core now) captures a layout's "before" state, lets Angular's
+    <code>&#64;for</code> reorder or resize the DOM however it wants, then animates every tile from
+    where it was to where it landed — no manual position math. <code>injectGSAP</code> just needs to
+    read the same signals the grid renders from, so it re-runs right after the DOM settles into its
+    new shape.
+  </p>
+
+  <div class="toolbar">
+    <button class="btn" (click)="shuffle()">Shuffle</button>
+    <button class="btn" (click)="sortAlpha()">Sort A→Z</button>
+    <button class="btn" (click)="toggleSize()">Toggle size</button>
+  </div>
+
+  <div class="grid" [class.large]="large()" #grid>
+    @for (item of items(); track item.id) {
+      <div class="tile" #tile [style.--hue]="item.hue">{{ item.label }}</div>
+    }
+  </div>
+
+  <app-code-preview [code]="snippet" />
+</app-example-page>

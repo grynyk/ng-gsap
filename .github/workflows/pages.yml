@@ -36,8 +36,13 @@ jobs:
       - name: Build playground
         run: yarn build:playground
 
-      - name: SPA fallback for client-side routing
+      # Every route is prerendered to its own index.html, so deep links resolve
+      # directly. 404.html only catches URLs that don't match a route at all.
+      - name: Fallback for unknown URLs
         run: cp dist/playground/browser/index.html dist/playground/browser/404.html
+
+      - name: Verify prerendered output
+        run: yarn verify:ssr
 
       - uses: actions/configure-pages@v5
 

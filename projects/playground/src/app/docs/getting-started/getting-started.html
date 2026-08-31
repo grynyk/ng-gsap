@@ -1,0 +1,47 @@
+<app-doc-page
+  title="Getting started"
+  lede="Install, provide once, then write GSAP. The Angular half is handled for you."
+>
+  <h2>Install</h2>
+  <p>
+    The schematic adds <code>gsap</code> as a dependency and wires <code>provideGsap()</code> into
+    your application config for you.
+  </p>
+  <app-code-preview [code]="install" title="terminal" />
+
+  <p>Or do it by hand — <code>gsap</code> is a peer dependency and is never bundled:</p>
+  <app-code-preview [code]="installManual" title="terminal" />
+  <app-code-preview [code]="provide" title="app.config.ts" />
+
+  <h2>Your first animation</h2>
+  <p>
+    <code>injectGSAP</code> runs its callback inside a <code>gsap.context()</code> wired to
+    Angular's reactivity. You never list what the animation depends on — Angular tracks the signals
+    you read, so changing one re-runs the callback with the previous run already reverted.
+  </p>
+  <app-code-preview [code]="first" title="box.ts" />
+
+  <div class="note">
+    <p>
+      Nothing to declare, nothing to clean up. That is the entire idea — everything else in this
+      library follows from it.
+    </p>
+  </div>
+
+  <h2>What <code>scope</code> does</h2>
+  <p>
+    <code>scope</code> confines every selector string used inside the callback to that element, so
+    <code>'.box'</code> can never reach into another component. Pass a <code>viewChild()</code>
+    signal and it resolves once the view exists. You can skip it entirely if you pass real elements
+    to GSAP instead of selector strings.
+  </p>
+
+  <h2>Where to go next</h2>
+  <ul>
+    <li><a routerLink="/docs/api">API reference</a> — all four exports and both entry points.</li>
+    <li>
+      <a routerLink="/docs/guides">Guides</a> — SSR, testing, route transitions, reduced motion.
+    </li>
+    <li><a routerLink="/basic-tween">Live examples</a> — every idea, running, with its source.</li>
+  </ul>
+</app-doc-page>

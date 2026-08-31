@@ -1,4 +1,5 @@
-import { Component, ElementRef, signal, viewChild } from '@angular/core';
+import type { ElementRef } from '@angular/core';
+import { Component, Injector, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { gsap } from 'gsap';
 import { injectGSAP } from './inject-gsap';
@@ -63,12 +64,83 @@ describe('injectGSAP', () => {
     await fixture.whenStable();
 
     const el = fixture.componentInstance.box().nativeElement;
-    const onClick = fixture.componentInstance.gsapHandle.contextSafe(() => gsap.to(el, { rotation: 90, duration: 1 }));
+    const onClick = fixture.componentInstance.gsapHandle.contextSafe(() =>
+      gsap.to(el, { rotation: 90, duration: 1 }),
+    );
     onClick();
 
     expect(gsap.getTweensOf(el).length).toBe(2);
 
     fixture.destroy();
     expect(gsap.getTweensOf(el).length).toBe(0);
+  });
+
+  describe('scope', () => {
+    it('accepts a plain Element', async () => {
+      const host = document.createElement('div');
+      host.innerHTML = '<div class="scoped"></div>';
+      document.body.appendChild(host);
+
+      const injector: Injector = TestBed.inject(Injector);
+      TestBed.runInInjectionContext(() =>
+        injectGSAP(() => void gsap.to('.scoped', { x: 10, duration: 1 }), {
+          scope: host,
+          injector,
+        }),
+      );
+      TestBed.tick();
+
+      expect(gsap.getTweensOf(host.querySelector('.scoped')).length).toBe(1);
+      host.remove();
+    });
+
+    it('accepts a plain ElementRef', async () => {
+      const host = document.createElement('div');
+      host.innerHTML = '<div class="scoped-ref"></div>';
+      document.body.appendChild(host);
+
+      const injector: Injector = TestBed.inject(Injector);
+      TestBed.runInInjectionContext(() =>
+        injectGSAP(() => void gsap.to('.scoped-ref', { x: 10, duration: 1 }), {
+          scope: { nativeElement: host } as ElementRef<Element>,
+          injector,
+        }),
+      );
+      TestBed.tick();
+
+      expect(gsap.getTweensOf(host.querySelector('.scoped-ref')).length).toBe(1);
+      host.remove();
+    });
+
+    it('runs unscoped when no scope is given', async () => {
+      const injector: Injector = TestBed.inject(Injector);
+      const callback = vi.fn();
+
+      TestBed.runInInjectionContext(() => injectGSAP(callback, { injector }));
+      TestBed.tick();
+
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('runs unscoped when the scope signal has not resolved yet', async () => {
+      const injector: Injector = TestBed.inject(Injector);
+      const scope = signal<ElementRef<Element> | undefined>(undefined);
+      const callback = vi.fn();
+
+      TestBed.runInInjectionContext(() => injectGSAP(callback, { scope, injector }));
+      TestBed.tick();
+
+      expect(callback).toHaveBeenCalled();
+    });
+  });
+
+  it('contextSafe calls straight through before the context exists', () => {
+    const injector: Injector = TestBed.inject(Injector);
+    const handle = TestBed.runInInjectionContext(() => injectGSAP(() => undefined, { injector }));
+
+    // No render has happened yet, so there is no context to add to — the
+    // wrapper must still call the function rather than swallowing it.
+    expect(handle.context()).toBeUndefined();
+    expect(handle.contextSafe((value: number) => value * 2)(21)).toBe(42);
   });
 });

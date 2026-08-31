@@ -1,0 +1,36 @@
+<app-example-page title="Timeline" source="timeline" entryPoint="ng-gsap">
+  <p>
+    A timeline is just something you build inside the <code>injectGSAP</code> callback. Because the
+    callback reads <code>stagger()</code>, changing the slider reverts the old timeline and builds a
+    new one — there is no teardown code in this component at all.
+  </p>
+
+  <div class="example-stage" #stage>
+    @for (box of boxes; track box) {
+      <div class="box"></div>
+    }
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-accent" (click)="replay()">Replay</button>
+
+    <label>
+      Stagger
+      <input
+        type="range"
+        min="0"
+        max="0.4"
+        step="0.01"
+        [value]="stagger()"
+        (input)="setStagger($any($event.target).value)"
+      />
+      <span class="value">{{ stagger().toFixed(2) }}s</span>
+    </label>
+
+    <div class="progress" role="progressbar" [attr.aria-valuenow]="progress().toFixed(2)">
+      <div class="progress-fill" [style.transform]="'scaleX(' + progress() + ')'"></div>
+    </div>
+  </div>
+
+  <app-code-preview [code]="snippet" />
+</app-example-page>

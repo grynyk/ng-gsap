@@ -11,7 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  # Fast feedback: static analysis and everything that runs in jsdom.
+  check:
+    name: Lint, test, build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,11 +28,60 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Check formatting
+        run: yarn format:check
+
+      - name: Lint
+        run: yarn lint
+
       - name: Build ng-gsap
         run: yarn build:lib
 
-      - name: Test ng-gsap
-        run: yarn test --watch=false
+      - name: Test ng-gsap (jsdom, with coverage thresholds)
+        run: yarn test:coverage --watch=false
 
-      - name: Build playground
+      - name: Test docs site
+        run: yarn test:playground --watch=false
+
+      # outputMode is "static", so this prerenders every route in Node with no
+      # DOM. It is the SSR test: anything touching the DOM on the server fails here.
+      - name: Build docs site (prerendered)
         run: yarn build:playground
+
+      - name: Verify prerendered output
+        run: yarn verify:ssr
+
+  # Everything that needs real layout, real matchMedia and real paint.
+  browser:
+    name: Browser tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Enable corepack (Yarn)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Install Chromium
+        run: yarn playwright install --with-deps chromium
+
+      - name: Build ng-gsap
+        run: yarn build:lib
+
+      # jsdom has no layout and no matchMedia, so ScrollTrigger only really runs here.
+      - name: Test ng-gsap (Chromium)
+        run: yarn test:browser --watch=false
+
+      - name: Build docs site
+        run: yarn build:playground
+
+      # Drives the production build served the way Pages serves it, so this
+      # covers base-href and deep links as well as the animations themselves.
+      - name: End-to-end
+        run: yarn e2e

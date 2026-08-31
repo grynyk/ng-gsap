@@ -1,0 +1,98 @@
+<app-doc-page
+  title="API reference"
+  lede="Four exports in the main entry point, and one each in the three optional ones."
+>
+  <table>
+    <thead>
+      <tr>
+        <th>Export</th>
+        <th>Entry point</th>
+        <th>What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>injectGSAP</code></td>
+        <td><code>ng-gsap</code></td>
+        <td>The core primitive: auto-tracked dependencies, scoped context, automatic revert.</td>
+      </tr>
+      <tr>
+        <td><code>provideGsap</code></td>
+        <td><code>ng-gsap</code></td>
+        <td>Plugins, defaults and reduced-motion handling, once at bootstrap.</td>
+      </tr>
+      <tr>
+        <td><code>animationSignals</code></td>
+        <td><code>ng-gsap</code></td>
+        <td>Mirrors playback state of a tween or timeline as readonly signals.</td>
+      </tr>
+      <tr>
+        <td><code>gsapScrub</code></td>
+        <td><code>ng-gsap</code></td>
+        <td>A writable signal bound both ways to a timeline's progress.</td>
+      </tr>
+      <tr>
+        <td><code>injectScrollTrigger</code></td>
+        <td><code>ng-gsap/scroll-trigger</code></td>
+        <td>Scroll position as signals, with the plugin registered for you.</td>
+      </tr>
+      <tr>
+        <td><code>provideGsapRouteTransitions</code></td>
+        <td><code>ng-gsap/router</code></td>
+        <td>Enter and leave animations for routed views, app-wide.</td>
+      </tr>
+      <tr>
+        <td><code>provideGsapTesting</code> / <code>advanceGsap</code></td>
+        <td><code>ng-gsap/testing</code></td>
+        <td>Freeze GSAP and advance it by exact amounts in tests.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>injectGSAP</h2>
+  <app-code-preview [code]="injectGsap" />
+  <p>
+    Returns <code>context</code> (a signal of the live <code>gsap.Context</code>, for imperative
+    escape hatches) and <code>contextSafe</code>.
+  </p>
+
+  <h3>contextSafe</h3>
+  <p>
+    The reactive callback already runs inside the context. A handler defined outside it does not, so
+    the tweens it creates would escape cleanup. Wrap handlers that
+    <strong>create animations</strong>
+    — and only those.
+  </p>
+  <app-code-preview [code]="contextSafe" />
+  <div class="note">
+    <p>Wrapping a plain signal write is a common cargo cult. It does nothing.</p>
+  </div>
+
+  <h2>provideGsap</h2>
+  <app-code-preview [code]="provideGsap" />
+
+  <h2>animationSignals</h2>
+  <app-code-preview [code]="animationSignals" />
+  <p>
+    Kills the animation on destroy by default. Pass
+    <code>{{ '{' }} killOnDestroy: false {{ '}' }}</code>
+    when you are mirroring an animation whose lifetime belongs to something else.
+  </p>
+
+  <h2>gsapScrub</h2>
+  <app-code-preview [code]="gsapScrub" />
+
+  <h2>ng-gsap/scroll-trigger</h2>
+  <app-code-preview [code]="scrollTrigger" />
+  <p>
+    Where ScrollTrigger cannot run — during SSR, or under jsdom, neither of which has layout to
+    measure — the handle stays inert and <code>isSupported</code> is <code>false</code>, rather than
+    throwing. Components that use it stay unit-testable.
+  </p>
+
+  <h2>ng-gsap/router</h2>
+  <app-code-preview [code]="router" />
+
+  <h2>ng-gsap/testing</h2>
+  <app-code-preview [code]="testing" />
+</app-doc-page>

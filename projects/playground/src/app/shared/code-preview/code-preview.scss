@@ -2,15 +2,75 @@
   display: block;
 }
 
-pre {
+figure {
+  position: relative;
   margin: 0;
-  padding: 1.25rem;
-  background: #101217;
+  background: var(--bg-code);
   border: 1px solid var(--border);
   border-radius: 12px;
-  overflow-x: auto;
+  overflow: hidden;
+}
+
+figcaption {
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
   font-family: var(--mono);
-  font-size: 0.82rem;
-  line-height: 1.6;
-  color: #d3d6dd;
+  font-size: 0.76rem;
+  letter-spacing: 0.02em;
+  background: var(--bg-card);
+}
+
+pre {
+  margin: 0;
+  padding: 1.1rem 1.25rem;
+  overflow-x: auto;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.83rem;
+  line-height: 1.7;
+  color: #24272e;
+  white-space: pre;
+}
+
+.copy {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text-dim);
+  font-size: 0.74rem;
+  font-family: var(--mono);
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    color: var(--accent);
+    border-color: var(--angular-magenta);
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 2px solid var(--angular-violet);
+    outline-offset: 2px;
+  }
+
+  &.copied {
+    opacity: 1;
+    color: var(--accent);
+    border-color: var(--angular-magenta);
+  }
+}
+
+figure:hover .copy,
+figure:focus-within .copy {
+  opacity: 1;
 }

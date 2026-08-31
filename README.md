@@ -1,50 +1,90 @@
 # ng-gsap
 
-A signals-first wrapper for using [GSAP](https://gsap.com) in Angular, in the spirit of [`@gsap/react`](https://gsap.com/resources/React).
+**Signals-first [GSAP](https://gsap.com) for Angular.** No dependency array, no teardown, SSR-safe by
+construction.
 
-`@gsap/react`'s `useGSAP` hook takes a manual dependency array. Angular doesn't need one — the core
-primitive, `injectGSAP()`, wraps your animation callback in an Angular render effect, so any signal read
-inside it becomes a live dependency automatically. See [`projects/ng-gsap/README.md`](projects/ng-gsap/README.md)
-for the full pitch and API reference (that's also what ships on npm).
+```ts
+injectGSAP(() => {
+  // `open` is read here, so this re-runs whenever it changes
+  gsap.to('.box', { x: this.open() ? 220 : 0 });
+}, { scope: this.container });
+```
 
-This repo is an Angular CLI workspace with two projects:
+The callback runs inside a `gsap.context()` driven by an Angular render effect. You never list what
+the animation depends on — Angular tracks the signals you read — and the context reverts itself
+before every re-run and again on destroy.
 
-- **`projects/ng-gsap`** — the publishable library, with `ng-gsap/scroll-trigger` and `ng-gsap/testing` as
-  separate entry points.
-- **`projects/playground`** — a zoneless demo app with a live example for every primitive and directive
-  (basic tween, hover directive, DI-composed timeline, ScrollTrigger progress, two-way scrubber, SVG draw-in,
-  signal-driven list enter/leave).
+See [`projects/ng-gsap/README.md`](projects/ng-gsap/README.md) for the full API — that's what ships on
+npm.
+
+## Workspace layout
+
+```
+projects/ng-gsap/          the publishable library
+  src/                     ng-gsap            — injectGSAP, provideGsap, animationSignals, gsapScrub
+  router/                  ng-gsap/router     — provideGsapRouteTransitions
+  scroll-trigger/          ng-gsap/scroll-trigger — injectScrollTrigger
+  testing/                 ng-gsap/testing    — provideGsapTesting, advanceGsap
+  schematics/              ng add ng-gsap
+  spec-helpers/            shared test utilities (not published)
+projects/playground/       docs site + live examples, prerendered
+  src/app/core/            navigation model shared by shell, home and tests
+  src/app/docs/            getting started, API reference, guides
+  src/app/examples/        one page per idea
+  src/app/shared/          page layouts and the code viewer
+e2e/                       browser smoke test + SSR output checks
+scripts/                   schematics build, package verification
+```
 
 ## Requirements
 
 - Node.js (LTS)
-- [Yarn](https://yarnpkg.com) via [Corepack](https://nodejs.org/api/corepack.html) — run `corepack enable`
-  once, then `yarn` resolves to the version pinned in `package.json`'s `packageManager` field. Do not use npm
-  or pnpm in this repo; the `nodeLinker: node-modules` setting in `.yarnrc.yml` is there because Angular's
-  tooling doesn't support Yarn's Plug'n'Play linker.
+- [Yarn](https://yarnpkg.com) via [Corepack](https://nodejs.org/api/corepack.html) — run
+  `corepack enable` once, then `yarn` resolves to the version pinned in `package.json`'s
+  `packageManager` field. Don't use npm or pnpm here: the `nodeLinker: node-modules` setting in
+  `.yarnrc.yml` exists because Angular's tooling doesn't support Yarn's Plug'n'Play linker.
 
 ## Development
 
 ```bash
 yarn install
-yarn build:lib        # build the library into dist/ng-gsap — the playground imports from there
-yarn start             # serve the playground at http://localhost:4200
-yarn test              # run the library's unit tests (Vitest)
+yarn build:lib          # library + schematics into dist/ng-gsap
+yarn start              # serve the docs site at http://localhost:4200
+yarn lint               # ESLint (TypeScript + Angular templates + a11y)
+yarn test               # library unit tests (Vitest + jsdom)
+yarn test:coverage      # the same, with thresholds enforced
+yarn test:browser       # the same specs in headless Chromium
+yarn test:playground    # docs site unit tests
+yarn verify:ssr         # assert the prerendered output is correct
+yarn e2e                # drive the built site in a real browser
+yarn verify:package     # pack, install into a fresh app, run `ng add`, build
 ```
 
-The playground's `tsconfig.json` path-maps `ng-gsap` (and its sub-entry points) to `dist/ng-gsap`, so
-`yarn build:lib` must be re-run after library changes for the playground to pick them up. `yarn watch` runs
-that build in watch mode if you're iterating on both at once.
+The playground path-maps `ng-gsap` to `dist/ng-gsap`, so `yarn build:lib` has to be re-run after
+library changes. `yarn watch` does that in watch mode.
+
+### Why so many verification commands
+
+Each one covers something the others structurally cannot:
+
+| Command | Covers what nothing else can |
+| --- | --- |
+| `yarn test` | Fast feedback on logic, in jsdom. Thresholds via `yarn test:coverage`. |
+| `yarn test:browser` | Real layout and `matchMedia` — the only place ScrollTrigger genuinely runs. |
+| `yarn verify:ssr` | The app rendered in Node with no DOM, asserting no animation side effects leak into server output. |
+| `yarn e2e` | The production build, served the way GitHub Pages serves it, animations actually moving pixels. |
+| `yarn verify:package` | The published tarball, installed by an unrelated app — exports map, peer ranges, `ng add`. |
 
 ## CI/CD
 
-- **`.github/workflows/ci.yml`** — builds the library and playground and runs the test suite on every push/PR
-  to `main`.
-- **`.github/workflows/release.yml`** — publishes `ng-gsap` to npm on `v*.*.*` tags. Needs an `NPM_TOKEN`
-  repository secret.
-- **`.github/workflows/pages.yml`** — deploys the playground to GitHub Pages on push to `main`.
+- **`ci.yml`** — lint, format, library and docs-site unit tests, both builds, plus a second job for
+  the Chromium test run, SSR checks and end-to-end.
+- **`release.yml`** — verifies the tag matches the package version, runs everything, then publishes to
+  npm. Needs an `NPM_TOKEN` secret.
+- **`pages.yml`** — deploys the prerendered docs site to GitHub Pages on push to `main`.
 
-See [`HANDOFF.txt`](HANDOFF.txt) for what's finished, what's still open, and where this could go next.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development workflow, the reasoning behind the API's
+shape, and the non-obvious things that will bite you. [`CHANGELOG.md`](CHANGELOG.md) tracks releases.
 
 ## License
 

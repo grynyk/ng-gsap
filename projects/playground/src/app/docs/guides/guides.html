@@ -1,0 +1,61 @@
+<app-doc-page
+  title="Guides"
+  lede="The four things people ask about after the first animation works."
+>
+  <h2>Server-side rendering</h2>
+  <p>
+    <code>injectGSAP</code> runs in the <code>write</code> phase of Angular's render lifecycle,
+    which never executes on the server. There is no <code>isPlatformBrowser</code> check to write
+    and no <code>afterNextRender</code> wrapper to remember.
+  </p>
+  <app-code-preview [code]="ssr" />
+  <div class="note">
+    <p>
+      This site is the proof: it is built with <code>outputMode: "static"</code>, so all eleven
+      pages — every example on this site included — are rendered in Node with no DOM on every build.
+      A checked-in script then asserts the server output contains real content and no GSAP side
+      effects.
+    </p>
+  </div>
+  <p>
+    <code>injectScrollTrigger</code> and <code>provideGsapRouteTransitions</code> are server-safe
+    the same way: both detect that there is no browser and stay inert instead of throwing.
+  </p>
+
+  <h2>Testing</h2>
+  <p>
+    <code>ng-gsap/testing</code> freezes GSAP so nothing moves except what you move, then lets you
+    advance it by an exact number of milliseconds.
+  </p>
+  <app-code-preview [code]="testing" title="box.spec.ts" />
+  <p>
+    Note that <strong>fake timers cannot drive GSAP</strong>, in this or any wrapper: GSAP captures
+    a direct reference to <code>Date.now</code> when its module first loads, so it keeps reading
+    real wall-clock time no matter what <code>vi.useFakeTimers()</code> does to the global
+    <code>Date</code>. <code>advanceGsap</code> seeks GSAP's global timeline instead, which
+    sidesteps the clock entirely — that is why it is exact rather than approximately right.
+  </p>
+
+  <h2>Route transitions</h2>
+  <p>
+    <code>ng-gsap/router</code> animates routed views in and out app-wide, without touching a single
+    component.
+  </p>
+  <app-code-preview [code]="router" title="app.config.ts" />
+  <p>
+    Angular's router does not wait for animations before destroying a view, so rather than blocking
+    navigation, <code>leave</code> receives a pinned clone of the outgoing element and animates
+    that. The clone keeps its classes and inline styles; what it cannot carry over is live state —
+    canvas contents, video position, uncommitted form input. Animate only on <code>enter</code> for
+    views where that matters.
+  </p>
+
+  <h2>Reduced motion</h2>
+  <app-code-preview [code]="reducedMotion" />
+  <p>
+    While the OS reports <code>prefers-reduced-motion: reduce</code>, animation collapses to its end
+    state. Elements land where they belong instead of being stranded mid-<code>from()</code>,
+    callbacks still fire, and ScrollTrigger still scrubs. It reacts to the setting changing
+    mid-session and restores normal playback on teardown.
+  </p>
+</app-doc-page>

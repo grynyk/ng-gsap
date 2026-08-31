@@ -1,7 +1,9 @@
-import { Component, ElementRef, signal } from '@angular/core';
+import type { ElementRef } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { gsap } from 'gsap';
-import { GsapFrom, injectGSAP } from 'ng-gsap';
+import { injectGSAP } from 'ng-gsap';
 import { CodePreview } from '../../shared/code-preview/code-preview';
+import { ExamplePage } from '../../shared/example-page/example-page';
 
 interface Item {
   id: number;
@@ -10,27 +12,41 @@ interface Item {
 
 let nextId = 4;
 
-const SNIPPET = `// enter: [gsapFrom] fires automatically — it's a fresh element every time
-<div *ngFor="let item of items()" [gsapFrom]="{ opacity: 0, x: -24 }">{{ item.label }}</div>
+const SNIPPET = `private list = viewChild.required<ElementRef>('list');
+private entered = new Set<number>();
 
-// leave: Angular has no Animations module here, so animate first, then remove
-remove(id: number, el: HTMLElement) {
+// enter: reading items() re-runs this on every add, and only rows we haven't
+// animated before get a tween
+private anim = injectGSAP(() => {
+  this.items();
+  const fresh = Array.from(this.list().nativeElement.querySelectorAll('.item'))
+    .filter((el) => !this.entered.has(Number(el.dataset.id)));
+
+  fresh.forEach((el) => this.entered.add(Number(el.dataset.id)));
+  if (fresh.length) {
+    gsap.from(fresh, { opacity: 0, x: -24, stagger: 0.05 });
+  }
+}, { scope: this.list });
+
+// leave: this handler CREATES a tween, so it goes through contextSafe
+protected remove = this.anim.contextSafe((id: number, el: HTMLElement) => {
   gsap.to(el, {
     opacity: 0,
     x: 24,
     duration: 0.25,
     onComplete: () => this.items.update((list) => list.filter((i) => i.id !== id)),
   });
-}`;
+});`;
 
 @Component({
   selector: 'app-signal-driven-list',
-  imports: [GsapFrom, CodePreview],
+  imports: [CodePreview, ExamplePage],
   templateUrl: './signal-driven-list.html',
   styleUrl: './signal-driven-list.scss',
 })
 export class SignalDrivenList {
   protected readonly snippet = SNIPPET;
+  private readonly list = viewChild.required<ElementRef<HTMLElement>>('list');
 
   protected readonly items = signal<Item[]>([
     { id: 1, label: 'Design the API' },
@@ -38,26 +54,46 @@ export class SignalDrivenList {
     { id: 3, label: 'Ship it' },
   ]);
 
-  private readonly anim = injectGSAP(() => {});
+  // Rows already animated in. Reverting a `from` tween restores the element's
+  // natural CSS, so replayed runs can't strand an old row at opacity 0.
+  private readonly entered = new Set<number>();
+
+  private readonly anim = injectGSAP(
+    () => {
+      this.items(); // the dependency
+
+      const fresh = Array.from(
+        this.list().nativeElement.querySelectorAll<HTMLElement>('.item'),
+      ).filter((el) => !this.entered.has(Number(el.dataset['id'])));
+
+      for (const el of fresh) {
+        this.entered.add(Number(el.dataset['id']));
+      }
+
+      if (fresh.length) {
+        gsap.from(fresh, { opacity: 0, x: -24, stagger: 0.05 });
+      }
+    },
+    { scope: this.list },
+  );
 
   protected add(): void {
     this.items.update((list) => [...list, { id: nextId++, label: `New item ${nextId - 1}` }]);
   }
 
-  protected remove(id: number, target: EventTarget | null): void {
-    const el = (target as HTMLElement).closest<HTMLElement>('.item');
+  protected readonly remove = this.anim.contextSafe((id: number, target: EventTarget | null) => {
+    const el = (target as HTMLElement | null)?.closest<HTMLElement>('.item');
     if (!el) {
       this.items.update((list) => list.filter((item) => item.id !== id));
       return;
     }
 
-    this.anim.contextSafe(() => {
-      gsap.to(el, {
-        opacity: 0,
-        x: 24,
-        duration: 0.25,
-        onComplete: () => this.items.update((list) => list.filter((item) => item.id !== id)),
-      });
-    })();
-  }
+    this.entered.delete(id);
+    gsap.to(el, {
+      opacity: 0,
+      x: 24,
+      duration: 0.25,
+      onComplete: () => this.items.update((list) => list.filter((item) => item.id !== id)),
+    });
+  });
 }

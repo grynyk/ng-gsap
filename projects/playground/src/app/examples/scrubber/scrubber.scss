@@ -6,8 +6,36 @@
   gap: 2rem;
 }
 
-input[type='range'] {
-  width: 100%;
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   margin-top: 1.25rem;
+}
+
+input[type='range'] {
+  flex: 1;
   accent-color: var(--accent);
+}
+
+.readout {
+  display: flex;
+  gap: 2rem;
+  margin: 1.25rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+
+  div {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  dt {
+    color: var(--text-dim);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--accent);
+  }
 }

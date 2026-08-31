@@ -1,24 +1,25 @@
-<h1>SVG draw-in</h1>
-<p>
-  DrawSVGPlugin is a paid bonus plugin, so this uses the classic free-tier trick instead:
-  <code>stroke-dasharray</code> set to the path's real length via <code>getTotalLength()</code>, then
-  animate <code>strokeDashoffset</code> to 0.
-</p>
+<app-example-page title="SVG draw-in" source="svg-draw" entryPoint="ng-gsap + gsap/DrawSVGPlugin">
+  <p>
+    <code>DrawSVGPlugin</code> ships free in gsap core since the Webflow acquisition, so this is a
+    one-liner: animate <code>drawSVG</code> from <code>'0%'</code>. Registering it in the component
+    that uses it keeps it out of everyone else's bundle.
+  </p>
 
-<div class="example-stage">
-  <svg viewBox="0 0 200 160" width="200" height="160">
-    <path
-      #path
-      class="draw-path"
-      d="M30,90 L75,130 L170,30"
-      fill="none"
-      stroke-width="14"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
-</div>
+  <div class="example-stage">
+    <svg viewBox="0 0 200 160" width="200" height="160">
+      <path
+        #path
+        class="draw-path"
+        d="M30,90 L75,130 L170,30"
+        fill="none"
+        stroke-width="14"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </div>
 
-<button class="btn" (click)="replay()">Replay</button>
+  <button class="btn" (click)="replay()">Replay</button>
 
-<app-code-preview [code]="snippet" />
+  <app-code-preview [code]="snippet" />
+</app-example-page>

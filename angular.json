@@ -9,8 +9,8 @@
     "ng-gsap": {
       "projectType": "library",
       "root": "projects/ng-gsap",
-      "sourceRoot": "projects/ng-gsap/src",
-      "prefix": "ngx",
+      "sourceRoot": "projects/ng-gsap",
+      "prefix": "gsap",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
@@ -27,7 +27,17 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "projects/ng-gsap/tsconfig.spec.json"
+            "tsConfig": "projects/ng-gsap/tsconfig.spec.json",
+            "isolate": true,
+            "coverageExclude": [
+              "**/spec-helpers/**"
+            ],
+            "coverageThresholds": {
+              "statements": 99,
+              "branches": 98,
+              "functions": 97,
+              "lines": 99
+            }
           }
         }
       }
@@ -55,7 +65,11 @@
                 "input": "projects/playground/public"
               }
             ],
-            "styles": ["projects/playground/src/styles.scss"]
+            "styles": [
+              "projects/playground/src/styles.scss"
+            ],
+            "server": "projects/playground/src/main.server.ts",
+            "outputMode": "static"
           },
           "configurations": {
             "production": {

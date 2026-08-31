@@ -1,0 +1,19 @@
+<app-example-page title="Text reveal" source="text-reveal" entryPoint="ng-gsap + gsap/SplitText">
+  <p>
+    <code>SplitText</code> shipped free in GSAP core after the Webflow acquisition — no separate
+    club license needed anymore. Its <code>mask: 'lines'</code> option auto-wraps each line in an
+    overflow-hidden mask, so words can slide up from underneath. <code>injectGSAP</code> reverts and
+    rebuilds the split cleanly on every replay.
+  </p>
+
+  <div class="example-stage hero-stage">
+    <div class="hero" #heading>
+      <h2 class="hero-title">Animate anything, <span class="accent">declaratively.</span></h2>
+      <p class="hero-sub">Signals in, GSAP out — nothing to declare, nothing to clean up.</p>
+    </div>
+  </div>
+
+  <button class="btn btn-accent" (click)="replay()">Replay</button>
+
+  <app-code-preview [code]="snippet" />
+</app-example-page>

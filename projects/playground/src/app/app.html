@@ -2,17 +2,20 @@
   <aside class="sidebar">
     <a class="brand" routerLink="/">
       <span class="brand-mark">ng-gsap</span>
-      <span class="brand-sub">playground</span>
+      <span class="brand-sub">signals-first GSAP for Angular</span>
     </a>
 
-    <nav>
-      @for (link of links; track link.path) {
-        <a [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
+    <nav aria-label="Documentation and examples">
+      @for (section of sections; track section.title) {
+        <p class="nav-section">{{ section.title }}</p>
+        @for (item of section.items; track item.path) {
+          <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+        }
       }
     </nav>
 
     <div class="sidebar-footer">
-      <a href="https://github.com/danielgrynyk/ng-gsap" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/grynyk/ng-gsap" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.npmjs.com/package/ng-gsap" target="_blank" rel="noopener">npm</a>
     </div>
   </aside>

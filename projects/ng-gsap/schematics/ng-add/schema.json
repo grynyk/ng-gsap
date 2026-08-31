@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "NgGsapNgAdd",
+  "title": "ng-gsap ng-add schematic",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "The project to add ng-gsap to.",
+      "$default": { "$source": "projectName" }
+    },
+    "plugins": {
+      "type": "boolean",
+      "default": false,
+      "description": "Also register ScrollTrigger and import it from ng-gsap/scroll-trigger.",
+      "x-prompt": "Register the ScrollTrigger plugin?"
+    },
+    "respectReducedMotion": {
+      "type": "boolean",
+      "default": true,
+      "description": "Collapse animations when the OS asks for reduced motion.",
+      "x-prompt": "Respect prefers-reduced-motion?"
+    },
+    "skipInstall": {
+      "type": "boolean",
+      "default": false,
+      "description": "Skip installing dependencies."
+    }
+  },
+  "required": []
+}

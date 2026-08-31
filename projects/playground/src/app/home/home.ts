@@ -1,16 +1,19 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { EXAMPLE_SECTIONS } from '../core/navigation';
 import { CodePreview } from '../shared/code-preview/code-preview';
 
-const SNIPPET = `private container = viewChild.required<ElementRef>('container');
-private open = signal(false);
+const SNIPPET = `private stage = viewChild.required<ElementRef>('stage');
+protected open = signal(false);
 
-private anim = injectGSAP(() => {
-  gsap.to('.box', { x: this.open() ? 200 : 0 });
-  // reading open() here IS the dependency — no array to maintain
-}, { scope: this.container });
+injectGSAP(() => {
+  // \`open\` is read here, so this re-runs whenever it changes
+  gsap.to('.box', { x: this.open() ? 220 : 0 });
+}, { scope: this.stage });
 
-onClick = this.anim.contextSafe(() => this.open.update(v => !v));`;
+protected toggle() {
+  this.open.update((v) => !v);
+}`;
 
 @Component({
   selector: 'app-home',
@@ -20,4 +23,5 @@ onClick = this.anim.contextSafe(() => this.open.update(v => !v));`;
 })
 export class Home {
   protected readonly snippet = SNIPPET;
+  protected readonly sections = EXAMPLE_SECTIONS;
 }

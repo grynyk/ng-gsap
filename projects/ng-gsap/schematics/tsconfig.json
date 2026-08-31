@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "target": "ES2022",
+    "module": "commonjs",
+    "ignoreDeprecations": "6.0",
+    "declaration": false,
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "outDir": "../../../dist/ng-gsap/schematics",
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["**/*.spec.ts"]
+}

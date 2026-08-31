@@ -1,32 +1,45 @@
 {
   "name": "ng-gsap",
-  "version": "0.1.0",
-  "description": "A signals-first wrapper for using GSAP animations in Angular, in the spirit of @gsap/react.",
+  "version": "1.0.0",
+  "description": "Signals-first GSAP for Angular: auto-tracked dependencies, automatic cleanup, SSR-safe.",
   "keywords": [
     "angular",
     "gsap",
     "animation",
     "signals",
     "scrolltrigger",
-    "zoneless"
+    "zoneless",
+    "ssr",
+    "scroll",
+    "route-transitions"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danielgrynyk/ng-gsap.git",
+    "url": "git+https://github.com/grynyk/ng-gsap.git",
     "directory": "projects/ng-gsap"
   },
   "bugs": {
-    "url": "https://github.com/danielgrynyk/ng-gsap/issues"
+    "url": "https://github.com/grynyk/ng-gsap/issues"
   },
-  "homepage": "https://github.com/danielgrynyk/ng-gsap#readme",
+  "homepage": "https://github.com/grynyk/ng-gsap#readme",
+  "schematics": "./schematics/collection.json",
+  "ng-add": {
+    "save": "dependencies"
+  },
   "peerDependencies": {
-    "@angular/common": ">=21.0.0",
-    "@angular/core": ">=21.0.0",
+    "@angular/common": ">=22.0.0",
+    "@angular/core": ">=22.0.0",
+    "@angular/router": ">=22.0.0",
     "gsap": ">=3.12.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependenciesMeta": {
+    "@angular/router": {
+      "optional": true
+    }
+  }
 }

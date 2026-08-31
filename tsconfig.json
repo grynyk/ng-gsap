@@ -3,12 +3,14 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "ng-gsap": ["./dist/ng-gsap"],
+      "ng-gsap/router": ["./dist/ng-gsap/router"],
       "ng-gsap/scroll-trigger": ["./dist/ng-gsap/scroll-trigger"],
       "ng-gsap/testing": ["./dist/ng-gsap/testing"]
     },
@@ -22,7 +24,9 @@
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true,
+    "typeCheckHostBindings": true
   },
   "files": [],
   "references": [

@@ -1,12 +1,13 @@
-<h1>Basic tween</h1>
-<p>
-  <code>injectGSAP</code> runs its callback inside an Angular render effect. There's no dependency array —
-  reading <code>open()</code> inside the callback is what makes it a dependency. Click the box; nothing else
-  is wired up.
-</p>
+<app-example-page title="Basic tween" source="basic-tween" entryPoint="ng-gsap">
+  <p>
+    <code>injectGSAP</code> runs its callback inside an Angular render effect. Nothing here declares
+    what the animation depends on: Angular tracks the signals you read, and <code>open()</code> is
+    read inside the callback. Click the box — nothing else is wired up.
+  </p>
 
-<div class="example-stage" #container>
-  <div class="box" (click)="toggle()"></div>
-</div>
+  <div class="example-stage" #container>
+    <button class="box" type="button" (click)="toggle()" aria-label="Toggle the tween"></button>
+  </div>
 
-<app-code-preview [code]="snippet" />
+  <app-code-preview [code]="snippet" />
+</app-example-page>

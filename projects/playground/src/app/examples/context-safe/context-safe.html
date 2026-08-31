@@ -1,0 +1,25 @@
+<app-example-page title="Event handlers" source="context-safe" entryPoint="ng-gsap">
+  <p>
+    <code>contextSafe</code> is the other half of the API. The reactive callback is already inside a
+    <code>gsap.context()</code>, but a click handler isn't — so tweens it creates would escape
+    cleanup. Wrapping the handler puts them back under the same context.
+  </p>
+  <p>
+    The distinction that matters: wrap handlers that <strong>create animations</strong>. A handler
+    that only writes a signal needs nothing — the callback re-runs and reverts the previous run for
+    you.
+  </p>
+
+  <div class="example-stage" #stage>
+    @for (chip of chips; track chip) {
+      <button class="chip" (click)="burst($event)">{{ chip }}</button>
+    }
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-accent" (click)="shuffle()">Replay entrance (plain signal write)</button>
+    <span class="hint">Click any chip to spin it (contextSafe)</span>
+  </div>
+
+  <app-code-preview [code]="snippet" />
+</app-example-page>

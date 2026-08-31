@@ -1,6 +1,8 @@
-import { Component, ElementRef, viewChild } from '@angular/core';
+import type { ElementRef } from '@angular/core';
+import { Component, viewChild } from '@angular/core';
 import { injectScrollTrigger } from 'ng-gsap/scroll-trigger';
 import { CodePreview } from '../../shared/code-preview/code-preview';
+import { ExamplePage } from '../../shared/example-page/example-page';
 
 const SNIPPET = `private section = viewChild.required<ElementRef>('section');
 
@@ -14,7 +16,7 @@ protected scrollTrigger = injectScrollTrigger({
 
 @Component({
   selector: 'app-scroll-progress',
-  imports: [CodePreview],
+  imports: [CodePreview, ExamplePage],
   templateUrl: './scroll-progress.html',
   styleUrl: './scroll-progress.scss',
 })

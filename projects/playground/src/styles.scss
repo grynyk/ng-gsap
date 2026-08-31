@@ -1,14 +1,37 @@
 :root {
-  --bg: #0b0c10;
-  --bg-raised: #15171d;
-  --bg-card: #1b1e26;
-  --border: #2a2e38;
-  --text: #e8e9ed;
-  --text-dim: #9298a6;
-  --accent: #9fe436;
-  --accent-dim: #6f9e26;
+  // Surfaces — light, with a faintly cool grey for raised panels.
+  --bg: #ffffff;
+  --bg-raised: #f6f7f9;
+  --bg-card: #ffffff;
+  --bg-code: #f7f8fa;
+  --border: #e2e5ea;
+  --border-strong: #cfd4dc;
+
+  --text: #14161a;
+  --text-dim: #5a6270;
+
+  // Angular's brand ramp: red → magenta → violet.
+  --angular-red: #e40035;
+  --angular-magenta: #f20089;
+  --angular-violet: #7c4dff;
+
+  // Deepened red for text and links, so it clears contrast on white.
+  --accent: #c3002f;
+  --accent-dim: #99002a;
+  --gradient: linear-gradient(
+    120deg,
+    var(--angular-red) 0%,
+    var(--angular-magenta) 55%,
+    var(--angular-violet) 100%
+  );
+
+  --shadow-sm: 0 1px 2px rgb(20 22 26 / 6%);
+  --shadow-md: 0 6px 20px rgb(20 22 26 / 8%);
+
   --mono: 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  color-scheme: light;
 }
 
 * {
@@ -31,8 +54,13 @@ body {
 h1,
 h2,
 h3 {
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+h1 {
+  font-size: 2.1rem;
 }
 
 a {
@@ -48,28 +76,63 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
+  padding: 0.6rem 1.15rem;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
   background: var(--bg-card);
   color: var(--text);
   font-size: 0.9rem;
-  transition: border-color 0.15s ease;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
 
   &:hover {
-    border-color: var(--accent-dim);
+    border-color: var(--angular-magenta);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--angular-violet);
+    outline-offset: 2px;
   }
 }
 
+// Angular's gradient, with a second layer that brightens on hover rather than
+// re-rendering the gradient (which browsers can't interpolate smoothly).
 .btn-accent {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #0b0c10;
+  position: relative;
+  border-color: transparent;
+  background: var(--gradient);
+  color: #fff;
   font-weight: 600;
+  box-shadow: var(--shadow-sm);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(120deg, #ff1f57 0%, #ff33a1 55%, #9a6bff 100%);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
 
   &:hover {
-    background: var(--accent-dim);
-    border-color: var(--accent-dim);
+    border-color: transparent;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+
+    &::after {
+      opacity: 1;
+    }
   }
 }
 
@@ -77,13 +140,16 @@ button {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.35rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .example-stage {
-  background: var(--bg-raised);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background:
+    linear-gradient(var(--bg-raised), var(--bg-raised)) padding-box,
+    var(--gradient) border-box;
+  border: 1px solid transparent;
+  border-radius: 14px;
   padding: 2.5rem;
   display: flex;
   align-items: center;
@@ -96,22 +162,27 @@ button {
 .box {
   width: 64px;
   height: 64px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent), #4e8a12);
+  border-radius: 13px;
+  background: var(--gradient);
+  box-shadow: var(--shadow-md);
 }
 
 main p {
   color: var(--text-dim);
-  max-width: 640px;
-  line-height: 1.6;
+  max-width: 660px;
+  line-height: 1.65;
 }
 
-main code {
+// Inline code only — `> code` keeps this off the <code> inside a <pre>, which
+// the code viewer styles itself.
+main :not(pre) > code {
   font-family: var(--mono);
-  background: var(--bg-card);
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-  font-size: 0.9em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  padding: 0.08rem 0.35rem;
+  border-radius: 5px;
+  font-size: 0.88em;
+  color: var(--text);
 }
 
 app-code-preview {

@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.example-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+
+  h1 {
+    margin-bottom: 0.35rem;
+  }
+}
+
+.entry-point {
+  margin: 0;
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+}
+
+.source-link {
+  flex-shrink: 0;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--text-dim);
+  border-bottom: 1px solid transparent;
+
+  &:hover {
+    color: var(--accent);
+    border-bottom-color: var(--angular-magenta);
+  }
+}

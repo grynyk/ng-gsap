@@ -1,0 +1,119 @@
+# Contributing to ng-gsap
+
+Thanks for taking a look. This is a deliberately small library — please read
+[Scope](#scope) before proposing a new export.
+
+## Getting set up
+
+Requires Node.js LTS and Yarn via Corepack (`corepack enable`). Don't use npm or pnpm here: the
+`nodeLinker: node-modules` setting in `.yarnrc.yml` exists because Angular's tooling doesn't support
+Yarn's Plug'n'Play linker.
+
+```bash
+yarn install
+yarn build:lib     # library + schematics into dist/ng-gsap
+yarn start         # docs site at http://localhost:4200
+```
+
+The docs site path-maps `ng-gsap` to `dist/ng-gsap`, so **re-run `yarn build:lib` after library
+changes** or the site won't see them. `yarn watch` does that in watch mode.
+
+## Repository layout
+
+```
+projects/ng-gsap/          the publishable library
+  src/                     ng-gsap                 — injectGSAP, provideGsap, animationSignals, gsapScrub
+  router/                  ng-gsap/router          — provideGsapRouteTransitions
+  scroll-trigger/          ng-gsap/scroll-trigger  — injectScrollTrigger
+  testing/                 ng-gsap/testing         — provideGsapTesting, advanceGsap
+  schematics/              ng add ng-gsap
+  spec-helpers/            shared test utilities (not published)
+projects/playground/       docs site + live examples, prerendered
+e2e/                       browser smoke test + SSR output checks
+scripts/                   schematics build, package verification
+```
+
+## Verification
+
+Every command covers something the others structurally cannot. Run the relevant ones before opening a
+PR; CI runs all but the last on every push.
+
+| Command | Covers what nothing else can |
+| --- | --- |
+| `yarn lint` | TypeScript, Angular templates, accessibility, unused code |
+| `yarn test` | Logic, in jsdom. Fast |
+| `yarn test:coverage` | The same, with thresholds enforced |
+| `yarn test:browser` | Real layout and `matchMedia` — the only place ScrollTrigger genuinely runs |
+| `yarn verify:ssr` | The app rendered in Node with no DOM |
+| `yarn e2e` | The production build, animations actually moving pixels |
+| `yarn verify:package` | The published tarball, installed by an unrelated app |
+
+Coverage thresholds are enforced in `angular.json` and currently sit just under the real numbers
+(~99% statements, ~99% branches). If you legitimately can't cover a branch, say why in a comment
+rather than lowering the threshold.
+
+### Adding a secondary entry point
+
+Create `projects/ng-gsap/<name>/` with `ng-package.json`, `package.json` and `src/public-api.ts`,
+then add the path mapping to `tsconfig.json` and the spec glob to
+`projects/ng-gsap/tsconfig.spec.json`. **Check `ng test ng-gsap --list-tests` actually lists your new
+specs** — test discovery is rooted at the project's `sourceRoot`, and specs outside it are silently
+skipped. That exact mistake once left two entry points untested while CI stayed green.
+
+## Scope
+
+The library's value is that `injectGSAP` is the one thing you have to learn. Every export past that
+dilutes it.
+
+An attribute-directive layer (`gsapTo`, `gsapFrom`, `gsapHover`, `gsapTimeline`, …) was deliberately
+removed. It was thin sugar over one-line `gsap.to()` calls that you outgrew the moment you wanted a
+timeline or a callback, and every one of them tore down with
+`gsap.getTweensOf(el).forEach(t => t.kill())` — which kills *every* tween on that element, so two
+directives on one host fought each other. **Please don't propose bringing it back**; the answer is to
+write the GSAP call inside `injectGSAP`.
+
+New entry points are welcome when they carry real weight (`ng-gsap/router` earns it). Declarative
+wrappers over single GSAP calls are not.
+
+## Things that will bite you
+
+These were all measured, not reasoned about. Please don't "simplify" them back.
+
+- **Fake timers cannot drive GSAP.** It does `var _getTime = Date.now` at module load, capturing the
+  reference, so it keeps reading real wall-clock time whatever `vi.useFakeTimers()` does to the
+  global `Date`. A 500ms advance moved a 1s tween to progress 0.001. `advanceGsap` seeks the global
+  timeline instead.
+- **`gsap.ticker.sleep()` doesn't freeze playback** either — creating any tween wakes it again
+  (measured drift 0.053 over 50ms). `provideGsapTesting` pauses the global timeline, which holds.
+- **`advanceGsap` accumulates whole milliseconds** and divides once, from a zero clock origin.
+  Doing `time(time() + delta)` in seconds drifts (`0.49999999999999994`).
+- **`gsap.eventCallback` replaces, it does not chain.** Assigning one silently discards a callback
+  the caller set. Use `chainEventCallback`, or chain by hand as `ng-gsap/router` does.
+- **jsdom has no `matchMedia` at all**, so `registerPlugin(ScrollTrigger)` throws there.
+  `injectScrollTrigger` detects this and returns an inert handle. Specs that stub `matchMedia` must
+  save and restore the original property descriptor — they run in both jsdom and Chromium, and a
+  leaked stub silently changes what other specs exercise.
+- **Test isolation is on** (`"isolate": true`). The library manipulates global GSAP state — ticker,
+  defaults, global timeline — so specs sharing a process was a real hazard.
+- **`gsapScrub` breaks its feedback loop with an epsilon comparison, not a flag.** `effect()` flushes
+  asynchronously, so a synchronously-reset flag is already `false` by the time the effect body runs.
+- **The routed view is the outlet's next sibling.** `ng-gsap/router` depends on this; it was verified
+  in a browser, not assumed. If a future Angular changes it, that's what breaks.
+
+## Style
+
+Prettier and ESLint are enforced in CI (`yarn format`, `yarn lint:fix`). Beyond that: comments should
+explain *why*, not restate the code. Several comments in this repo record measurements that cost real
+time to establish — keep that kind.
+
+## Commits and PRs
+
+Branch from `main`, keep the working tree green, and describe what you verified. If you changed
+anything animation-timing related, say which of the verification commands you ran.
+
+Releases are tag-driven: `release.yml` refuses to publish when the tag and the version in
+`projects/ng-gsap/package.json` disagree.
+
+The public API is stable as of 1.0.0. Anything that changes the signature, return type or observable
+behaviour of a documented export is a breaking change and waits for a major — including the optional
+entry points. Add a `CHANGELOG.md` entry with every user-visible change.

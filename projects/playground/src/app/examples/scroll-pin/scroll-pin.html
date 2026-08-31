@@ -1,0 +1,36 @@
+<app-example-page
+  title="Pinned scroll story"
+  source="scroll-pin"
+  entryPoint="ng-gsap/scroll-trigger"
+>
+  <p>
+    <code>injectScrollTrigger</code> accepts the full <code>ScrollTrigger.StaticVars</code> surface
+    — including <code>pin</code> — so the same primitive that drove the progress bar earlier can
+    also pin a section and scrub through chapters. Everything below reads the
+    <code>progress</code> signal directly; there's no separate <code>gsap.timeline()</code> to keep
+    in sync with the DOM.
+  </p>
+
+  <div class="story" #story>
+    @for (chapter of chapters; track chapter.title; let i = $index) {
+      @let op = opacityFor(i);
+      <div
+        class="chapter"
+        [style.opacity]="op"
+        [style.transform]="'translateY(' + (1 - op) * 28 + 'px)'"
+      >
+        <span class="chapter-index">0{{ i + 1 }}</span>
+        <h2>{{ chapter.title }}</h2>
+        <p>{{ chapter.body }}</p>
+      </div>
+    }
+
+    <div class="dots">
+      @for (chapter of chapters; track chapter.title; let i = $index) {
+        <span class="dot" [class.active]="activeIndex() === i"></span>
+      }
+    </div>
+  </div>
+
+  <app-code-preview [code]="snippet" />
+</app-example-page>

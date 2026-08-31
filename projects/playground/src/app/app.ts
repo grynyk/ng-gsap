@@ -1,10 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-
-interface NavLink {
-  path: string;
-  label: string;
-}
+import { NAV_SECTIONS } from './core/navigation';
 
 @Component({
   selector: 'app-root',
@@ -13,13 +9,5 @@ interface NavLink {
   styleUrl: './app.scss',
 })
 export class App {
-  protected readonly links: NavLink[] = [
-    { path: '/basic-tween', label: 'Basic tween' },
-    { path: '/hover', label: 'Hover directive' },
-    { path: '/timeline', label: 'Timeline composition' },
-    { path: '/scroll-progress', label: 'ScrollTrigger progress' },
-    { path: '/scrubber', label: 'Two-way scrubber' },
-    { path: '/svg-draw', label: 'SVG draw-in' },
-    { path: '/list', label: 'Signal-driven list' },
-  ];
+  protected readonly sections = NAV_SECTIONS;
 }

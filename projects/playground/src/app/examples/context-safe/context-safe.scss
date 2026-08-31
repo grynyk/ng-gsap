@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.example-stage {
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+
+  &:hover {
+    border-color: var(--angular-magenta);
+  }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.hint {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}

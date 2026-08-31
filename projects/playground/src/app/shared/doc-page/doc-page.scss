@@ -1,0 +1,72 @@
+:host {
+  display: block;
+}
+
+.prose {
+  max-width: 46rem;
+}
+
+.lede {
+  font-size: 1.05rem;
+  color: var(--text);
+  margin-bottom: 2rem;
+}
+
+::ng-deep .prose h2 {
+  margin-top: 2.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.25rem;
+}
+
+::ng-deep .prose h3 {
+  margin-top: 2rem;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+::ng-deep .prose app-code-preview {
+  margin: 1.25rem 0 1.75rem;
+}
+
+::ng-deep .prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0 1.75rem;
+  font-size: 0.9rem;
+}
+
+::ng-deep .prose th,
+::ng-deep .prose td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+::ng-deep .prose th {
+  color: var(--text-dim);
+  background: var(--bg-raised);
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+::ng-deep .prose td code {
+  white-space: nowrap;
+}
+
+::ng-deep .prose .note {
+  border-left: 3px solid transparent;
+  border-image: var(--gradient) 1;
+  background: var(--bg-raised);
+  padding: 0.9rem 1.1rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1.5rem 0;
+
+  p {
+    margin: 0;
+    color: var(--text-dim);
+  }
+}
