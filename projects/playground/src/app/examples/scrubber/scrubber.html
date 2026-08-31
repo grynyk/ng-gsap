@@ -1,0 +1,15 @@
+<h1>Two-way scrubber</h1>
+<p>
+  <code>gsapScrub</code> returns a plain <code>WritableSignal</code> bound both ways to the timeline: drag
+  the slider to seek, or call <code>timeline.play()</code> and watch the slider follow along.
+</p>
+
+<div class="example-stage" #container>
+  <div class="box a"></div>
+  <div class="box b"></div>
+  <div class="box c"></div>
+</div>
+
+<input type="range" min="0" max="1" step="0.001" [(ngModel)]="progress" />
+
+<app-code-preview [code]="snippet" />

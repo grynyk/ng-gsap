@@ -1,0 +1,12 @@
+<h1>Basic tween</h1>
+<p>
+  <code>injectGSAP</code> runs its callback inside an Angular render effect. There's no dependency array —
+  reading <code>open()</code> inside the callback is what makes it a dependency. Click the box; nothing else
+  is wired up.
+</p>
+
+<div class="example-stage" #container>
+  <div class="box" (click)="toggle()"></div>
+</div>
+
+<app-code-preview [code]="snippet" />

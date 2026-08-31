@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+.example-stage {
+  gap: 2rem;
+}
+
+input[type='range'] {
+  width: 100%;
+  margin-top: 1.25rem;
+  accent-color: var(--accent);
+}

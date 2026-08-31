@@ -1,0 +1,39 @@
+:host {
+  display: block;
+}
+
+.lede {
+  font-size: 1.15rem;
+  color: var(--text-dim);
+}
+
+app-code-preview {
+  margin: 1.5rem 0 2.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.link-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: var(--text);
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+
+  span {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  &:hover {
+    border-color: var(--accent-dim);
+    transform: translateY(-2px);
+  }
+}

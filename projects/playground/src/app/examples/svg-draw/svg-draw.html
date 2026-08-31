@@ -1,0 +1,24 @@
+<h1>SVG draw-in</h1>
+<p>
+  DrawSVGPlugin is a paid bonus plugin, so this uses the classic free-tier trick instead:
+  <code>stroke-dasharray</code> set to the path's real length via <code>getTotalLength()</code>, then
+  animate <code>strokeDashoffset</code> to 0.
+</p>
+
+<div class="example-stage">
+  <svg viewBox="0 0 200 160" width="200" height="160">
+    <path
+      #path
+      class="draw-path"
+      d="M30,90 L75,130 L170,30"
+      fill="none"
+      stroke-width="14"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</div>
+
+<button class="btn" (click)="replay()">Replay</button>
+
+<app-code-preview [code]="snippet" />

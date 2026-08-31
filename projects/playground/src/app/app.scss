@@ -1,0 +1,77 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.75rem 1.25rem;
+  border-right: 1px solid var(--border);
+  background: var(--bg-raised);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.brand-mark {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--accent);
+}
+
+.brand-sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+nav a {
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+
+  &:hover {
+    color: var(--text);
+    background: var(--bg-card);
+  }
+
+  &.active {
+    color: var(--accent);
+    background: var(--bg-card);
+  }
+}
+
+.sidebar-footer {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+}
+
+main {
+  padding: 2.5rem 3rem;
+  max-width: 900px;
+}

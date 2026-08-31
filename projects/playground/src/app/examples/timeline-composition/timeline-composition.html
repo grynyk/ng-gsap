@@ -1,0 +1,18 @@
+<h1>Timeline composition</h1>
+<p>
+  <code>gsapTimeline</code> provides a shared timeline via DI. Each <code>[gsapFrom]</code> below discovers
+  it with <code>inject()</code> and adds itself instead of animating standalone — the same directive works
+  either way, no timeline reference passed through the component.
+</p>
+
+<div class="example-stage">
+  <div gsapTimeline class="row">
+    <div class="box" [gsapFrom]="{ opacity: 0, y: 40 }" gsapPosition="0"></div>
+    <div class="box" [gsapFrom]="{ opacity: 0, y: 40 }" gsapPosition="<0.1"></div>
+    <div class="box" [gsapFrom]="{ opacity: 0, y: 40 }" gsapPosition="<0.1"></div>
+  </div>
+</div>
+
+<button class="btn" (click)="replay()">Replay</button>
+
+<app-code-preview [code]="snippet" />

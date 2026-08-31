@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+pre {
+  margin: 0;
+  padding: 1.25rem;
+  background: #101217;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #d3d6dd;
+}

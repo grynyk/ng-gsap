@@ -1,0 +1,7 @@
+{
+  "name": "ng-gsap/scroll-trigger",
+  "sideEffects": false,
+  "peerDependencies": {
+    "gsap": ">=3.12.0"
+  }
+}

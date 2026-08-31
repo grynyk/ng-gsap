@@ -1,0 +1,12 @@
+<h1>Hover directive</h1>
+<p>
+  <code>[gsapHover]</code> is fully declarative. Without a matching <code>[gsapHoverLeave]</code>, it just
+  reverses the enter tween — no need to hand-write the mirrored animation.
+</p>
+
+<div class="example-stage row">
+  <div class="box" [gsapHover]="{ scale: 1.15, rotate: 8, duration: 0.25 }"></div>
+  <div class="box" [gsapHover]="{ y: -16, duration: 0.25 }" [gsapHoverLeave]="{ y: 0, duration: 0.6, ease: 'bounce.out' }"></div>
+</div>
+
+<app-code-preview [code]="snippet" />

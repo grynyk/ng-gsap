@@ -1,0 +1,23 @@
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/">
+      <span class="brand-mark">ng-gsap</span>
+      <span class="brand-sub">playground</span>
+    </a>
+
+    <nav>
+      @for (link of links; track link.path) {
+        <a [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="https://github.com/danielgrynyk/ng-gsap" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.npmjs.com/package/ng-gsap" target="_blank" rel="noopener">npm</a>
+    </div>
+  </aside>
+
+  <main>
+    <router-outlet />
+  </main>
+</div>

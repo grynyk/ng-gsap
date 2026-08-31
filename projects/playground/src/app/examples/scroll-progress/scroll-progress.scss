@@ -1,0 +1,43 @@
+:host {
+  display: block;
+}
+
+.progress-rail {
+  position: sticky;
+  top: 1rem;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  z-index: 1;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.readout {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.panel {
+  height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--mono);
+}

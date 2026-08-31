@@ -1,0 +1,32 @@
+{
+  "name": "ng-gsap",
+  "version": "0.1.0",
+  "description": "A signals-first wrapper for using GSAP animations in Angular, in the spirit of @gsap/react.",
+  "keywords": [
+    "angular",
+    "gsap",
+    "animation",
+    "signals",
+    "scrolltrigger",
+    "zoneless"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielgrynyk/ng-gsap.git",
+    "directory": "projects/ng-gsap"
+  },
+  "bugs": {
+    "url": "https://github.com/danielgrynyk/ng-gsap/issues"
+  },
+  "homepage": "https://github.com/danielgrynyk/ng-gsap#readme",
+  "peerDependencies": {
+    "@angular/common": ">=21.0.0",
+    "@angular/core": ">=21.0.0",
+    "gsap": ">=3.12.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

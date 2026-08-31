@@ -1,0 +1,22 @@
+<h1>ScrollTrigger progress</h1>
+<p>
+  <code>injectScrollTrigger</code> mirrors a ScrollTrigger's progress, isActive, and direction as signals.
+  Scroll the panel below — the bar and the label are just reading signals, no manual DOM writes and nothing
+  to unsubscribe on destroy.
+</p>
+
+<div class="progress-rail">
+  <div class="progress-fill" [style.width.%]="scrollTrigger.progress() * 100"></div>
+</div>
+<p class="readout">
+  progress: {{ (scrollTrigger.progress() * 100).toFixed(0) }}% · active:
+  {{ scrollTrigger.isActive() }}
+</p>
+
+<div class="section" #section>
+  @for (i of [1, 2, 3, 4]; track i) {
+    <div class="panel">panel {{ i }}</div>
+  }
+</div>
+
+<app-code-preview [code]="snippet" />

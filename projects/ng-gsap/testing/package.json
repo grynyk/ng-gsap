@@ -1,0 +1,7 @@
+{
+  "name": "ng-gsap/testing",
+  "sideEffects": false,
+  "peerDependencies": {
+    "gsap": ">=3.12.0"
+  }
+}

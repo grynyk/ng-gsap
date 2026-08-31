@@ -1,0 +1,43 @@
+<h1>ng-gsap</h1>
+<p class="lede">A signals-first wrapper for using GSAP in Angular, in the spirit of <code>@gsap/react</code>.</p>
+
+<p>
+  <code>@gsap/react</code>'s <code>useGSAP</code> hook takes a manual dependency array, same as
+  <code>useEffect</code>. Angular doesn't need that — an <code>effect()</code> already auto-tracks every
+  signal read inside it. So the core primitive, <code>injectGSAP()</code>, wraps your animation callback in
+  an effect: read a signal inside the callback and it becomes a live dependency automatically.
+</p>
+
+<app-code-preview [code]="snippet" />
+
+<h2>Explore the examples</h2>
+<div class="grid">
+  <a routerLink="/basic-tween" class="card link-card">
+    <strong>Basic tween</strong>
+    <span>injectGSAP + scope, auto-tracked signal dependencies</span>
+  </a>
+  <a routerLink="/hover" class="card link-card">
+    <strong>Hover directive</strong>
+    <span>Declarative [gsapHover], auto-reverse on leave</span>
+  </a>
+  <a routerLink="/timeline" class="card link-card">
+    <strong>Timeline composition</strong>
+    <span>Children join a parent timeline via DI, no manual wiring</span>
+  </a>
+  <a routerLink="/scroll-progress" class="card link-card">
+    <strong>ScrollTrigger progress</strong>
+    <span>injectScrollTrigger driving signals, zoneless-friendly</span>
+  </a>
+  <a routerLink="/scrubber" class="card link-card">
+    <strong>Two-way scrubber</strong>
+    <span>gsapScrub binds a signal to a timeline both ways</span>
+  </a>
+  <a routerLink="/svg-draw" class="card link-card">
+    <strong>SVG draw-in</strong>
+    <span>Line-drawing animation with plain gsap.to()</span>
+  </a>
+  <a routerLink="/list" class="card link-card">
+    <strong>Signal-driven list</strong>
+    <span>GSAP enter/leave as an Angular Animations replacement</span>
+  </a>
+</div>

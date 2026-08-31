@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org
+
+      - name: Enable corepack (Yarn)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Test
+        run: yarn test --watch=false
+
+      - name: Build ng-gsap
+        run: yarn build:lib
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+        working-directory: dist/ng-gsap
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
