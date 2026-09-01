@@ -26,6 +26,11 @@ let elapsedMilliseconds = 0;
  * any new animation is created, so tweens quietly drift with real time. Pausing
  * the root holds regardless of what gets created afterwards.
  *
+ * One consequence worth knowing: `gsap.set()` is a zero-duration tween on the
+ * global timeline, so it does **not** apply while that timeline is paused. In a
+ * test, set properties directly (`element.style.x = …`) or drive them through an
+ * animation you advance with `advanceGsap()`.
+ *
  * @example
  * TestBed.configureTestingModule({ providers: [provideGsapTesting()] });
  */

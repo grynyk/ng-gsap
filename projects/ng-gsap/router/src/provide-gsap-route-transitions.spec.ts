@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import type { Routes } from '@angular/router';
 import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { gsap } from 'gsap';
+import { provideGsapTesting } from '../../testing/src/provide-gsap-testing';
 import type { RouteTransitionContext } from './provide-gsap-route-transitions';
 import { provideGsapRouteTransitions } from './provide-gsap-route-transitions';
 
@@ -47,7 +48,13 @@ async function setup(
   routeConfig: Routes = routes,
 ) {
   TestBed.configureTestingModule({
-    providers: [provideRouter(routeConfig), provideGsapRouteTransitions(config)],
+    // Freeze gsap: assertions about what has and hasn't finished must not race
+    // wall-clock time on whatever machine happens to run them.
+    providers: [
+      provideGsapTesting(),
+      provideRouter(routeConfig),
+      provideGsapRouteTransitions(config),
+    ],
   });
 
   const router = TestBed.inject(Router);
@@ -104,17 +111,36 @@ describe('provideGsapRouteTransitions', () => {
   });
 
   describe('transform cleanup', () => {
-    it('clears the identity transform a finished enter animation leaves behind', async () => {
-      const { fixture, navigate } = await setup({
-        enter: ({ element }) => gsap.from(element, { y: 24, duration: 0.2 }),
+    /**
+     * Enter animations are created inside `afterNextRender`, which flushes some
+     * time after `whenStable()` resolves — so wait for the animation to exist
+     * rather than for a duration, then seek it rather than advancing a clock.
+     * Asserts on the element the transition was handed, not a fresh document
+     * query, which could pick up another fixture's outlet.
+     */
+    async function runEnter(vars: gsap.TweenVars): Promise<HTMLElement> {
+      let target: HTMLElement | undefined;
+      let animation: gsap.core.Animation | undefined;
+
+      const { navigate } = await setup({
+        enter: ({ element }) => {
+          target = element;
+          animation = gsap.to(element, { duration: 0.2, ...vars });
+          return animation;
+        },
       });
 
       await navigate('/one');
       await navigate('/two');
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      fixture.detectChanges();
+      await vi.waitFor(() => expect(animation).toBeTruthy());
+      animation?.progress(1);
 
-      const view = fixture.nativeElement.querySelector('gsap-page-two') as HTMLElement;
+      return target as HTMLElement;
+    }
+
+    it('clears the identity transform a finished enter animation leaves behind', async () => {
+      const view = await runEnter({ y: 0 });
+
       // A leftover `transform: translate(0px, 0px)` is visually invisible but
       // makes this element a containing block for position: fixed descendants,
       // which breaks ScrollTrigger pins inside the routed view.
@@ -122,16 +148,8 @@ describe('provideGsapRouteTransitions', () => {
     });
 
     it('leaves a transform the caller meant to keep', async () => {
-      const { fixture, navigate } = await setup({
-        enter: ({ element }) => gsap.to(element, { x: 40, duration: 0.2 }),
-      });
+      const view = await runEnter({ x: 40 });
 
-      await navigate('/one');
-      await navigate('/two');
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      fixture.detectChanges();
-
-      const view = fixture.nativeElement.querySelector('gsap-page-two') as HTMLElement;
       expect(view.style.transform).toContain('40');
     });
   });
@@ -177,12 +195,14 @@ describe('provideGsapRouteTransitions', () => {
   describe('leave', () => {
     it('animates a detached snapshot and removes it when done', async () => {
       let clone: HTMLElement | undefined;
+      let animation: gsap.core.Animation | undefined;
       const { navigate } = await setup({
         leave: ({ element }) => {
           clone = element;
           expect(element.isConnected).toBe(true);
           expect(element.style.position).toBe('fixed');
-          return gsap.to(element, { opacity: 0, duration: 0.2 });
+          animation = gsap.to(element, { opacity: 0, duration: 0.2 });
+          return animation;
         },
       });
 
@@ -190,9 +210,9 @@ describe('provideGsapRouteTransitions', () => {
       await navigate('/two');
 
       expect(clone?.tagName.toLowerCase()).toBe('gsap-page-one');
-      expect(clone?.isConnected).toBe(true); // still on screen while animating
+      expect(clone?.isConnected).toBe(true); // still on screen, gsap is frozen
 
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      animation?.progress(1); // seek to the end rather than advance a clock
       expect(clone?.isConnected).toBe(false);
     });
 
@@ -209,13 +229,17 @@ describe('provideGsapRouteTransitions', () => {
 
     it("keeps the caller's own onComplete", async () => {
       const onComplete = vi.fn();
+      let animation: gsap.core.Animation | undefined;
       const { navigate } = await setup({
-        leave: ({ element }) => gsap.to(element, { opacity: 0, duration: 0.2, onComplete }),
+        leave: ({ element }) => {
+          animation = gsap.to(element, { opacity: 0, duration: 0.2, onComplete });
+          return animation;
+        },
       });
 
       await navigate('/one');
       await navigate('/two');
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      animation?.progress(1);
 
       // Cleanup must chain onto the caller's callback, not replace it.
       expect(onComplete).toHaveBeenCalledTimes(1);

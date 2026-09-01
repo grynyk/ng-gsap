@@ -209,6 +209,10 @@ expect(tween.progress()).toBe(0.5); // exactly 0.5, every run
 playback when the TestBed environment is torn down. `advanceGsap(ms)` seeks it forward by exactly the
 time you ask for.
 
+Because the global timeline is paused, **`gsap.set()` does not apply inside a frozen test** — it is a
+zero-duration tween, and a paused timeline never renders it. Set properties directly, or drive them
+through an animation you advance.
+
 Note that **fake timers cannot drive GSAP**, in this or any wrapper: GSAP captures a direct reference
 to `Date.now` when its module first loads, so it keeps reading real wall-clock time no matter what
 `vi.useFakeTimers()` does to the global `Date`. Seeking sidesteps the clock entirely, which is why

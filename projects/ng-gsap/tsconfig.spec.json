@@ -10,7 +10,7 @@
     "src/**/*.d.ts",
     "src/**/*.spec.ts",
     "scroll-trigger/**/*.spec.ts",
-    "testing/**/*.spec.ts",
+    "testing/**/*.ts",
     "router/**/*.spec.ts",
     "spec-helpers/**/*.ts"
   ]

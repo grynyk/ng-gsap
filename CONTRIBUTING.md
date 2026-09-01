@@ -87,6 +87,10 @@ These were all measured, not reasoned about. Please don't "simplify" them back.
   (measured drift 0.053 over 50ms). `provideGsapTesting` pauses the global timeline, which holds.
 - **`advanceGsap` accumulates whole milliseconds** and divides once, from a zero clock origin.
   Doing `time(time() + delta)` in seconds drifts (`0.49999999999999994`).
+- **`gsap.set()` does nothing while the global timeline is paused.** It is a zero-duration tween, so
+  a paused root never renders it — which is the state `provideGsapTesting` puts gsap in. Library code
+  that has to touch the DOM unconditionally (like the router's transform cleanup) must write to the
+  style declaration directly.
 - **`gsap.eventCallback` replaces, it does not chain.** Assigning one silently discards a callback
   the caller set. Use `chainEventCallback`, or chain by hand as `ng-gsap/router` does.
 - **jsdom has no `matchMedia` at all**, so `registerPlugin(ScrollTrigger)` throws there.

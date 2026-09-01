@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import type { Routes } from '@angular/router';
 import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { gsap } from 'gsap';
+import { advanceGsap, provideGsapTesting } from '../../testing/src/provide-gsap-testing';
 import { provideGsapRouteTransitions } from './provide-gsap-route-transitions';
 
 @Component({ selector: 'gsap-alpha', template: '<p>alpha</p>' })
@@ -27,7 +28,8 @@ const routes: Routes = [
 
 async function setup(config: Parameters<typeof provideGsapRouteTransitions>[0]) {
   TestBed.configureTestingModule({
-    providers: [provideRouter(routes), provideGsapRouteTransitions(config)],
+    // Frozen gsap: these assert on animation state without racing real time.
+    providers: [provideGsapTesting(), provideRouter(routes), provideGsapRouteTransitions(config)],
   });
   const router = TestBed.inject(Router);
   const fixture = TestBed.createComponent(Shell);
@@ -111,7 +113,7 @@ describe('provideGsapRouteTransitions — edge cases', () => {
     ]);
     fixture.detectChanges();
     await fixture.whenStable();
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    advanceGsap(200); // past the 0.15s leave animations
 
     expect(snapshotsInDocument()).toBe(0);
   });
@@ -139,7 +141,7 @@ describe('provideGsapRouteTransitions — edge cases', () => {
     for (let i = 0; i < 12; i++) {
       await navigate(i % 2 === 0 ? '/alpha' : '/beta');
     }
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    advanceGsap(200);
 
     expect(snapshotsInDocument()).toBe(0);
   });

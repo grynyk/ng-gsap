@@ -28,6 +28,14 @@
     advance it by an exact number of milliseconds.
   </p>
   <app-code-preview [code]="testing" title="box.spec.ts" />
+  <div class="note">
+    <p>
+      Because the global timeline is paused, <code>gsap.set()</code> does not apply inside a frozen
+      test — it is a zero-duration tween, and a paused timeline never renders it. Set properties
+      directly, or drive them through an animation you advance.
+    </p>
+  </div>
+
   <p>
     Note that <strong>fake timers cannot drive GSAP</strong>, in this or any wrapper: GSAP captures
     a direct reference to <code>Date.now</code> when its module first loads, so it keeps reading

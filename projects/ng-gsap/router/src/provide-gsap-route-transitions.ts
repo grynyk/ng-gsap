@@ -169,14 +169,24 @@ const INERT_TRANSFORM =
  *
  * Reads the inline value rather than the computed one so it behaves the same
  * under jsdom, and leaves a transform the caller actually meant to keep.
+ *
+ * Removes the properties directly rather than going through
+ * `gsap.set({ clearProps })`: a `gsap.set` is a zero-duration tween on the
+ * global timeline, so it silently does nothing whenever that timeline is
+ * paused — which is exactly what `ng-gsap/testing` does. Touching the style
+ * declaration works regardless of gsap's clock.
  */
+const TRANSFORM_PROPERTIES = ['transform', 'translate', 'rotate', 'scale'] as const;
+
 function clearInertTransform(element: HTMLElement): void {
   const inline = element.style.transform;
 
   if (!element.isConnected || !inline || !INERT_TRANSFORM.test(inline.trim())) {
     return;
   }
-  gsap.set(element, { clearProps: 'transform,translate,rotate,scale' });
+  for (const property of TRANSFORM_PROPERTIES) {
+    element.style.removeProperty(property);
+  }
 }
 
 function runTransition(
