@@ -48,6 +48,10 @@ PR; CI runs all but the last on every push.
 | `yarn e2e` | The production build, animations actually moving pixels |
 | `yarn verify:package` | The published tarball, installed by an unrelated app |
 
+Check the **exit code**, not just the summary line. A run can print "74 passed" and still exit
+non-zero — Vitest fails the run on unhandled errors even when every test passed. That is exactly how
+the first CI failure slipped past local verification.
+
 Coverage thresholds are enforced in `angular.json` and currently sit just under the real numbers
 (~99% statements, ~99% branches). If you legitimately can't cover a branch, say why in a comment
 rather than lowering the threshold.
@@ -87,6 +91,9 @@ These were all measured, not reasoned about. Please don't "simplify" them back.
   (measured drift 0.053 over 50ms). `provideGsapTesting` pauses the global timeline, which holds.
 - **`advanceGsap` accumulates whole milliseconds** and divides once, from a zero clock origin.
   Doing `time(time() + delta)` in seconds drifts (`0.49999999999999994`).
+- **Never let an error escape into an RxJS `next` handler.** It surfaces as an unhandled error, which
+  fails the test run even when every test passes. Report caller errors through Angular's
+  `ErrorHandler` instead, as `ng-gsap/router` does.
 - **`gsap.set()` does nothing while the global timeline is paused.** It is a zero-duration tween, so
   a paused root never renders it — which is the state `provideGsapTesting` puts gsap in. Library code
   that has to touch the DOM unconditionally (like the router's transform cleanup) must write to the

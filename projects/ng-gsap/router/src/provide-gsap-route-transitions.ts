@@ -3,6 +3,7 @@ import type { EnvironmentProviders } from '@angular/core';
 import {
   DOCUMENT,
   DestroyRef,
+  ErrorHandler,
   InjectionToken,
   Injector,
   PLATFORM_ID,
@@ -192,6 +193,7 @@ function clearInertTransform(element: HTMLElement): void {
 function runTransition(
   transition: RouteTransition | undefined,
   context: RouteTransitionContext,
+  reportError: (error: unknown) => void,
   onSettled?: () => void,
 ): void {
   let animation: gsap.core.Animation | void | undefined;
@@ -200,9 +202,12 @@ function runTransition(
     animation = transition?.(context);
   } catch (error) {
     // A bug in the caller's callback must not strand a snapshot on screen
-    // forever. Clean up first, then let the error surface so they can see it.
+    // forever, nor tear down the router subscription and silently disable every
+    // later transition. Clean up, then hand the error to Angular's ErrorHandler
+    // so it surfaces the way the rest of the application's errors do.
     onSettled?.();
-    throw error;
+    reportError(error);
+    return;
   }
 
   if (!onSettled) {
@@ -269,6 +274,8 @@ export function provideGsapRouteTransitions(
       const router = inject(Router);
       const injector = inject(Injector);
       const document = inject(DOCUMENT);
+      const errorHandler = inject(ErrorHandler);
+      const reportError = (error: unknown) => errorHandler.handleError(error);
 
       let previousUrl = '';
       let isFirstNavigation = true;
@@ -304,6 +311,7 @@ export function provideGsapRouteTransitions(
           runTransition(
             leave,
             { element: clone, depth: pendingDepth, from: previousUrl, to: event.urlAfterRedirects },
+            reportError,
             () => {
               pendingSnapshots.delete(clone);
               clone.remove();
@@ -341,7 +349,7 @@ export function provideGsapRouteTransitions(
           () => {
             const incoming = viewChain(document, outletSelector)[depth];
             if (incoming) {
-              runTransition(enter, { element: incoming, depth, from, to }, () =>
+              runTransition(enter, { element: incoming, depth, from, to }, reportError, () =>
                 clearInertTransform(incoming),
               );
             }

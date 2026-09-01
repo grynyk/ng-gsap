@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ErrorHandler } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { Routes } from '@angular/router';
 import { Router, RouterOutlet, provideRouter } from '@angular/router';
@@ -29,7 +29,14 @@ const routes: Routes = [
 async function setup(config: Parameters<typeof provideGsapRouteTransitions>[0]) {
   TestBed.configureTestingModule({
     // Frozen gsap: these assert on animation state without racing real time.
-    providers: [provideGsapTesting(), provideRouter(routes), provideGsapRouteTransitions(config)],
+    // A collecting ErrorHandler lets the throwing-callback specs assert on what
+    // was reported instead of letting it escape as an unhandled error.
+    providers: [
+      { provide: ErrorHandler, useValue: { handleError: (e: unknown) => reportedErrors.push(e) } },
+      provideGsapTesting(),
+      provideRouter(routes),
+      provideGsapRouteTransitions(config),
+    ],
   });
   const router = TestBed.inject(Router);
   const fixture = TestBed.createComponent(Shell);
@@ -45,7 +52,13 @@ async function setup(config: Parameters<typeof provideGsapRouteTransitions>[0]) 
 
 const snapshotsInDocument = () => document.querySelectorAll('[aria-hidden="true"]').length;
 
+let reportedErrors: unknown[] = [];
+
 describe('provideGsapRouteTransitions — edge cases', () => {
+  beforeEach(() => {
+    reportedErrors = [];
+  });
+
   afterEach(() => {
     document.querySelectorAll('[aria-hidden="true"]').forEach((node) => node.remove());
   });
@@ -212,6 +225,21 @@ describe('provideGsapRouteTransitions — edge cases', () => {
     await navigate('/alpha');
 
     expect(enter).toHaveBeenCalledTimes(1);
+    expect(reportedErrors).toHaveLength(1);
+  });
+
+  it("reports a throwing callback through Angular's ErrorHandler", async () => {
+    const { navigate } = await setup({
+      leave: () => {
+        throw new Error('caller bug');
+      },
+    });
+
+    await navigate('/alpha');
+    await navigate('/beta');
+
+    expect(reportedErrors).toHaveLength(1);
+    expect((reportedErrors[0] as Error).message).toBe('caller bug');
   });
 
   it('removes the snapshot even if the leave callback throws', async () => {
