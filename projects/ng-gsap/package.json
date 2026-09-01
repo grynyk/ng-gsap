@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/grynyk/ng-gsap/issues"
   },
-  "homepage": "https://github.com/grynyk/ng-gsap#readme",
+  "homepage": "https://grynyk.github.io/ng-gsap/",
   "schematics": "./schematics/collection.json",
   "ng-add": {
     "save": "dependencies"

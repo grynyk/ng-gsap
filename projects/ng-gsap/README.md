@@ -1,7 +1,13 @@
 # ng-gsap
 
+[![npm](https://img.shields.io/npm/v/ng-gsap?color=%23e40035&label=npm)](https://www.npmjs.com/package/ng-gsap)
+[![CI](https://github.com/grynyk/ng-gsap/actions/workflows/ci.yml/badge.svg)](https://github.com/grynyk/ng-gsap/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/ng-gsap?color=%237c4dff)](LICENSE)
+
 **Signals-first [GSAP](https://gsap.com) for Angular.** No dependency array, no teardown, SSR-safe by
 construction.
+
+**[Documentation and live examples →](https://grynyk.github.io/ng-gsap/)**
 
 Requires Angular **22+** and `gsap` **3.12+**, both peer dependencies. Bring your own `gsap` install;
 this package never bundles it.
