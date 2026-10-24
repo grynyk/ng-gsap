@@ -12,8 +12,8 @@ construction.
 Requires Angular **22+** and `gsap` **3.12+**, both peer dependencies. Bring your own `gsap` install;
 this package never bundles it.
 
-Stable since 1.0.0 and versioned with [SemVer](https://semver.org): no breaking change to a documented
-export lands outside a major release, across every entry point.
+Pre-1.0 and versioned with [SemVer](https://semver.org): until 1.0.0 a breaking change to a documented
+export can land in any 0.x release, and the changelog always calls it out.
 
 ## The idea
 
