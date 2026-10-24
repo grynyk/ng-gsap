@@ -1,6 +1,7 @@
 import type { gsap } from 'gsap';
 
 type ChainableEvent = 'onUpdate' | 'onComplete' | 'onReverseComplete' | 'onStart';
+type EventCallback = (this: unknown, ...args: unknown[]) => void;
 
 /**
  * Adds `callback` to an animation's event without clobbering whatever the caller
@@ -13,11 +14,14 @@ export function chainEventCallback(
   type: ChainableEvent,
   callback: () => void,
 ): () => void {
-  const previous = animation.eventCallback(type) as (() => void) | null;
+  const previous = animation.eventCallback(type) as EventCallback | null;
   let stopped = false;
 
-  const chained = () => {
-    previous?.();
+  // A `function`, not an arrow: gsap invokes callbacks with `callbackScope` as
+  // `this` and `on*Params` as the arguments. Both belong to the caller's
+  // original callback and have to reach it untouched.
+  const chained = function (this: unknown, ...args: unknown[]): void {
+    previous?.apply(this, args);
     if (!stopped) {
       callback();
     }

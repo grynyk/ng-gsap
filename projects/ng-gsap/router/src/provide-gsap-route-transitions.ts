@@ -190,6 +190,27 @@ function clearInertTransform(element: HTMLElement): void {
   }
 }
 
+/**
+ * The events after which an animation will not move on its own again. Waiting
+ * for `onComplete` alone stranded the snapshot whenever the animation was
+ * reversed, or killed before it finished — which is what `killTweensOf` and a
+ * `gsap.context` revert do to an in-flight leave, and gsap reports as
+ * `onInterrupt`.
+ */
+const SETTLING_EVENTS = ['onComplete', 'onReverseComplete', 'onInterrupt'] as const;
+
+type EventCallback = (this: unknown, ...args: unknown[]) => void;
+
+/** Already on its final frame, so none of the settling events will ever fire. */
+function hasFinished(animation: gsap.core.Animation): boolean {
+  return animation.reversed() ? animation.totalProgress() === 0 : animation.totalProgress() === 1;
+}
+
+/**
+ * `onSettled` may run more than once — an animation can complete and later be
+ * reversed back to its start — so it has to be idempotent. Both callers are:
+ * removing a removed element and clearing a cleared transform are no-ops.
+ */
 function runTransition(
   transition: RouteTransition | undefined,
   context: RouteTransitionContext,
@@ -213,18 +234,21 @@ function runTransition(
   if (!onSettled) {
     return;
   }
-  if (!animation) {
+  if (!animation || hasFinished(animation)) {
     onSettled();
     return;
   }
 
-  // gsap stores exactly one callback per event, so assigning would silently
-  // discard an onComplete the caller set on their own animation. Chain instead.
-  const existing = animation.eventCallback('onComplete') as (() => void) | null;
-  animation.eventCallback('onComplete', () => {
-    existing?.();
-    onSettled();
-  });
+  for (const type of SETTLING_EVENTS) {
+    // gsap stores exactly one callback per event, so assigning would silently
+    // discard one the caller set on their own animation. Chain instead, and
+    // pass the caller's callback the `callbackScope` and params gsap gives us.
+    const existing = animation.eventCallback(type) as EventCallback | null;
+    animation.eventCallback(type, function (this: unknown, ...args: unknown[]) {
+      existing?.apply(this, args);
+      onSettled();
+    });
+  }
 }
 
 /**

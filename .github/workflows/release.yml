@@ -4,20 +4,20 @@ on:
   push:
     tags:
       - 'v*.*.*'
-  workflow_dispatch:
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write # npm trusted publishing (OIDC) and provenance
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          # Trusted publishing needs npm 11.5.1 or later; Node 24 ships npm 11.6.
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - name: Enable corepack (Yarn)
@@ -29,7 +29,6 @@ jobs:
       # Nothing bumps the version automatically, so make a mismatch loud here
       # rather than silently publishing whatever happens to be committed.
       - name: Verify tag matches package version
-        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           PKG=$(node -p "require('./projects/ng-gsap/package.json').version")
@@ -67,8 +66,23 @@ jobs:
       - name: Verify the package from outside
         run: yarn verify:package
 
+      # Authentication is npm trusted publishing: the registry trusts this
+      # repository's release.yml via GitHub's OIDC token, so there is no npm
+      # token to store or rotate, and provenance is attached automatically.
+      #
+      # A version that already exists is skipped rather than failed, so
+      # re-running a release after a transient failure is safe, and so is the
+      # tag for a version that had to be published by hand.
       - name: Publish to npm
-        run: npm publish --access public --provenance
         working-directory: dist/ng-gsap
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ -n "$(npm view "ng-gsap@$VERSION" version 2>/dev/null)" ]; then
+            echo "ng-gsap@$VERSION is already on npm; nothing to publish."
+            exit 0
+          fi
+          case "$VERSION" in
+            *-*) DIST_TAG="--tag next" ;; # pre-releases must never become `latest`
+            *) DIST_TAG="" ;;
+          esac
+          npm publish --access public $DIST_TAG

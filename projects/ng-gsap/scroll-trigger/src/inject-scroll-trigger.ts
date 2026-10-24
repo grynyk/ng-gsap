@@ -17,7 +17,10 @@ export interface InjectScrollTriggerOptions extends Omit<
   ScrollTrigger.StaticVars,
   'trigger' | 'onUpdate' | 'onToggle'
 > {
-  /** The element to track. Pass a `viewChild()` signal and it re-creates itself if the element changes. */
+  /**
+   * The element to track. Pass a `viewChild()` signal and the trigger waits
+   * until it resolves, then re-creates itself whenever the element changes.
+   */
   trigger?: ScrollTriggerTarget;
   /** Required only when calling outside an injection context. */
   injector?: Injector;
@@ -66,6 +69,10 @@ function resolveTarget(target: ScrollTriggerTarget | undefined): Element | undef
  * plugin for you, re-creates the trigger when a signal `trigger` changes, and
  * kills it on destroy.
  *
+ * An `animation` you pass in stays yours: a re-created or destroyed trigger
+ * stops driving it but never kills it. Create it inside `injectGSAP` and the
+ * context reverts it along with everything else.
+ *
  * @example
  * private section = viewChild.required<ElementRef>('section');
  * protected scroll = injectScrollTrigger({
@@ -95,9 +102,17 @@ export function injectScrollTrigger(options: InjectScrollTriggerOptions = {}): S
     afterRenderEffect(
       {
         write: (onCleanup) => {
+          const target = resolveTarget(trigger);
+          // Same rule as injectGSAP: an unresolved trigger signal would quietly
+          // fall back to ScrollTrigger's default target. The read above is a
+          // dependency, so this runs once the element exists.
+          if (isSignal(trigger) && !target) {
+            return;
+          }
+
           const st = ScrollTrigger.create({
             ...staticVars,
-            trigger: resolveTarget(trigger),
+            trigger: target,
             onUpdate: (self) => {
               progress.set(self.progress);
               direction.set(self.direction);
@@ -112,7 +127,11 @@ export function injectScrollTrigger(options: InjectScrollTriggerOptions = {}): S
           instance.set(st);
 
           onCleanup(() => {
-            st.kill();
+            // `kill()` also kills the linked `animation` by default. That belongs
+            // to whoever created it, and a trigger re-created after a signal
+            // change would otherwise be handed an animation that is already
+            // dead — so unpin and drop the listeners, but leave it alone.
+            st.kill(undefined, true);
             instance.set(undefined);
           });
         },

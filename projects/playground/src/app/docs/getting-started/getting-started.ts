@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CodePreview } from '../../shared/code-preview/code-preview';
 import { DocPage } from '../../shared/doc-page/doc-page';
 
@@ -6,11 +7,14 @@ const INSTALL = `ng add ng-gsap`;
 
 const INSTALL_MANUAL = `npm install ng-gsap gsap`;
 
-const PROVIDE = `import { provideGsap } from 'ng-gsap';
+const PROVIDE = `import { ApplicationConfig } from '@angular/core';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { provideGsap } from 'ng-gsap';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideGsap({
+      plugins: [ScrollTrigger], // only the ones you use; the rest stay tree-shaken out
       defaults: { ease: 'power2.out', duration: 0.6 },
       respectReducedMotion: true,
     }),
@@ -43,7 +47,7 @@ export class Box {
 
 @Component({
   selector: 'app-getting-started',
-  imports: [DocPage, CodePreview],
+  imports: [DocPage, CodePreview, RouterLink],
   templateUrl: './getting-started.html',
 })
 export class GettingStarted {

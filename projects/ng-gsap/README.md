@@ -46,11 +46,14 @@ npm install ng-gsap gsap
 
 ```ts
 // app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { provideGsap } from 'ng-gsap';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideGsap({
+      plugins: [ScrollTrigger], // only the ones you use; the rest stay tree-shaken out
       defaults: { ease: 'power2.out', duration: 0.6 },
       respectReducedMotion: true,
     }),
@@ -67,7 +70,10 @@ import { injectGSAP } from 'ng-gsap';
 
 @Component({
   selector: 'app-box',
-  template: `<div #container><div class="box"></div></div>`,
+  template: `
+    <div #container><div class="box"></div></div>
+    <button (click)="toggle()">Toggle</button>
+  `,
 })
 export class Box {
   private container = viewChild.required<ElementRef>('container');
@@ -89,21 +95,42 @@ export class Box {
 ```
 
 `scope` confines every selector string inside the callback to that element, so `'.box'` can't reach
-into another component.
+into another component. A `scope` signal that hasn't resolved yet (an optional `viewChild()` inside an
+`@if`) makes the callback wait: it runs as soon as the element exists, rather than running unscoped
+against the whole document.
 
 ## API
 
 | Export | What it does |
 | --- | --- |
-| `injectGSAP(callback, { scope })` | The core primitive. Auto-tracked signal dependencies, scoped `gsap.context()`, auto-revert on re-run and destroy, no-ops during SSR. Returns `{ context, contextSafe }`. |
-| `provideGsap(config)` | App-wide plugin registration, `gsap.defaults()`, and optional reduced-motion handling — once, at bootstrap. |
-| `animationSignals(animation)` | Mirrors a Tween or Timeline's `progress` / `isActive` / `duration` as readonly signals. |
-| `gsapScrub(timeline)` | A `WritableSignal<number>` bound both ways to a timeline's progress — drag a slider to seek, or play the timeline and watch the signal follow. |
+| `injectGSAP(callback, { scope, injector })` | The core primitive. Auto-tracked signal dependencies, scoped `gsap.context()`, auto-revert on re-run and destroy, no-ops during SSR. Returns `{ context, contextSafe }`. |
+| `provideGsap({ plugins, defaults, respectReducedMotion })` | App-wide plugin registration, `gsap.defaults()`, and optional reduced-motion handling — once, at bootstrap. |
+| `animationSignals(animation, { killOnDestroy, injector })` | Mirrors a Tween or Timeline's `progress` / `isActive` / `duration` as readonly signals. |
+| `gsapScrub(timeline, { killOnDestroy, injector })` | A `WritableSignal<number>` bound both ways to a timeline's progress — drag a slider to seek, or play the timeline and watch the signal follow. |
 
-Four exports, plus one each in three optional entry points. There are deliberately no
-`[gsapTo]`-style directives: they'd be a thin wrapper over a one-line `gsap.to()` that you'd fight the
-moment you wanted a timeline, an ease, or a callback. Write GSAP; let this library handle the Angular
-half.
+Four exports here, and four more across three optional entry points: `injectScrollTrigger`
+(`ng-gsap/scroll-trigger`), `provideGsapRouteTransitions` (`ng-gsap/router`), and `provideGsapTesting`
+with `advanceGsap` (`ng-gsap/testing`). There are deliberately no `[gsapTo]`-style directives: they'd
+be a thin wrapper over a one-line `gsap.to()` that you'd fight the moment you wanted a timeline, an
+ease, or a callback. Write GSAP; let this library handle the Angular half.
+
+### Shared options
+
+- `injector` — every `inject*` function and signal helper resolves what it needs from the injection
+  context you call it in. Pass an `Injector` only when calling from outside one.
+- `killOnDestroy` (`animationSignals`, `gsapScrub`) — kill the animation when the injection context is
+  destroyed. On by default; turn it off when you are mirroring an animation whose lifetime belongs to
+  something else.
+
+### Tokens and types
+
+`GSAP_CONFIG` holds the `GsapConfig` given to `provideGsap`, and `GSAP_ROUTE_TRANSITIONS` the
+`GsapRouteTransitionsConfig` given to `provideGsapRouteTransitions`; inject either to read the active
+configuration. Every option and handle type is exported too: `GsapConfig`, `InjectGsapOptions`,
+`GsapHandle`, `GsapScope`, `GsapScopeElement`, `AnimationSignalsOptions`, `AnimationSignals`,
+`GsapScrubOptions`, `ScrollTriggerTarget`, `InjectScrollTriggerOptions`, `ScrollTriggerHandle`,
+`RouteTransitionContext`, `RouteTransition` and `GsapRouteTransitionsConfig`. All of them are covered
+by the SemVer promise above.
 
 ### `contextSafe`
 
@@ -159,8 +186,10 @@ protected scroll = injectScrollTrigger({
 ```
 
 `progress`, `isActive` and `direction` are signals; `instance` is the live ScrollTrigger for
-imperative work like `refresh()`. Pass a signal as `trigger` and it re-creates itself when the element
-changes. It's killed on destroy.
+imperative work like `refresh()`. Pass a signal as `trigger` and the trigger waits for the element,
+then re-creates itself whenever it changes. It's killed on destroy. An `animation` you pass in stays
+yours: a re-created or destroyed trigger stops driving it but never kills it, so create it inside
+`injectGSAP` and let the context revert it.
 
 Where ScrollTrigger genuinely can't run — server-side rendering, or jsdom, neither of which has layout
 to measure — the handle stays inert (`isSupported === false`) instead of throwing, so components using
@@ -194,10 +223,20 @@ changed, so moving between two children of a section animates the child rather t
 whole shell. The transition receives that `depth` (`0` is the top-level outlet), so you can treat a
 shell change differently from a change within a section.
 
+The transition receives `{ element, depth, from, to }`: the host element (for `leave`, the snapshot),
+the outlet depth, and the URLs being left and entered. Two options tune the behaviour:
+`skipInitialTransition` (default `true`) leaves the first view the app renders alone, and
+`outletSelector` (default `'router-outlet'`) narrows which outlets are walked, which you only need with
+sibling outlets at one level.
+
 A navigation that swaps no view animates nothing — a rejected guard, or a change that only alters
 route params, where Angular reuses the component. One thing to keep in mind: a `leave` snapshot is
 briefly a second copy of the outgoing page in the DOM, which can make end-to-end selectors
 ambiguous.
+
+The snapshot is removed when the leave animation completes, reverse-completes or is killed; an
+animation that is already finished when you return it removes it at once. Callbacks you set on your
+own animation (`onComplete` and friends) keep running, with their params and `callbackScope` intact.
 
 ## `ng-gsap/testing`
 

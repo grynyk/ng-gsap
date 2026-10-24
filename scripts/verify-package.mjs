@@ -73,6 +73,11 @@ try {
 import { gsap } from 'gsap';
 import { animationSignals, gsapScrub, injectGSAP } from 'ng-gsap';
 import { injectScrollTrigger } from 'ng-gsap/scroll-trigger';
+import { advanceGsap, provideGsapTesting } from 'ng-gsap/testing';
+
+// The testing entry point is meant for specs, but the consumer app has none;
+// referencing it here still proves the export resolves and type-checks.
+export const testingTools = [advanceGsap, provideGsapTesting];
 
 @Component({
   selector: 'app-root',
@@ -95,24 +100,33 @@ export class App {
   );
 
   const appConfig = await readFile(join(app, 'src/app/app.config.ts'), 'utf-8');
-  await writeFile(
-    join(app, 'src/app/app.config.ts'),
-    appConfig
-      .replace(
-        "import { provideGsap } from 'ng-gsap';",
-        "import { provideGsap } from 'ng-gsap';\nimport { provideGsapRouteTransitions } from 'ng-gsap/router';\nimport { gsap } from 'gsap';",
-      )
-      .replace(
-        /\n\s*\]\s*\n\};?\s*$/,
-        `,
+  const patchedConfig = appConfig
+    .replace(
+      "import { provideGsap } from 'ng-gsap';",
+      "import { provideGsap } from 'ng-gsap';\nimport { provideGsapRouteTransitions } from 'ng-gsap/router';\nimport { gsap } from 'gsap';",
+    )
+    .replace(
+      /\n\s*\]\s*\n\};?\s*$/,
+      `,
     provideGsapRouteTransitions({
       enter: ({ element }) => gsap.from(element, { autoAlpha: 0, duration: 0.3 }),
     }),
   ],
 };
 `,
-      ),
-  );
+    );
+  // Both replacements are string surgery on generated code. If the CLI's output
+  // shape changes they silently no-op, and the router entry point would go
+  // unverified while this script still reports success.
+  if (
+    !patchedConfig.includes("from 'ng-gsap/router'") ||
+    !patchedConfig.includes('provideGsapRouteTransitions({')
+  ) {
+    throw new Error(
+      'Could not patch app.config.ts to use ng-gsap/router; the generated config shape has changed',
+    );
+  }
+  await writeFile(join(app, 'src/app/app.config.ts'), patchedConfig);
 
   step('Building the consumer application');
   run('npx', ['ng', 'build'], app);

@@ -86,8 +86,10 @@ Each one covers something the others structurally cannot:
 
 - **`ci.yml`** — lint, format, library and docs-site unit tests, both builds, plus a second job for
   the Chromium test run, SSR checks and end-to-end.
-- **`release.yml`** — verifies the tag matches the package version, runs everything, then publishes to
-  npm. Needs an `NPM_TOKEN` secret.
+- **`release.yml`** — on a `v*` tag: verifies the tag matches the package version, runs everything,
+  then publishes to npm through [trusted publishing](https://docs.npmjs.com/trusted-publishers)
+  (OIDC). No npm token is stored and provenance is attached automatically. A version that is already
+  on npm is skipped rather than failed.
 - **`pages.yml`** — deploys the prerendered docs site to GitHub Pages on push to `main`.
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development workflow, the reasoning behind the API's

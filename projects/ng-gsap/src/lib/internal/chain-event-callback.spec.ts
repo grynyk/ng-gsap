@@ -19,6 +19,32 @@ describe('chainEventCallback', () => {
     tween.kill();
   });
 
+  it('hands gsap’s params and callback scope to the caller’s original callback', () => {
+    const scope = { owner: true };
+    let seenThis: unknown;
+    let seenArgs: unknown[] = [];
+    const tween = gsap.to(
+      {},
+      {
+        duration: 1,
+        paused: true,
+        callbackScope: scope,
+        onUpdateParams: ['first', 2],
+        onUpdate(this: unknown, ...args: unknown[]) {
+          seenThis = this;
+          seenArgs = args;
+        },
+      },
+    );
+
+    chainEventCallback(tween, 'onUpdate', () => undefined);
+    tween.progress(0.5);
+
+    expect(seenThis).toBe(scope);
+    expect(seenArgs).toEqual(['first', 2]);
+    tween.kill();
+  });
+
   it('works when there was no existing callback', () => {
     const added = vi.fn();
     const tween = pausedTween();

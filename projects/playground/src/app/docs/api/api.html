@@ -1,6 +1,6 @@
 <app-doc-page
   title="API reference"
-  lede="Four exports in the main entry point, and one each in the three optional ones."
+  lede="Four exports in the main entry point, and four more across the three optional ones."
 >
   <table>
     <thead>
@@ -49,11 +49,19 @@
     </tbody>
   </table>
 
+  <p>
+    Every <code>inject*</code> function and signal helper takes an optional <code>injector</code>,
+    needed only when you call it outside an injection context. <code>animationSignals</code> and
+    <code>gsapScrub</code> also take <code>killOnDestroy</code> (default <code>true</code>).
+  </p>
+
   <h2>injectGSAP</h2>
   <app-code-preview [code]="injectGsap" />
   <p>
     Returns <code>context</code> (a signal of the live <code>gsap.Context</code>, for imperative
-    escape hatches) and <code>contextSafe</code>.
+    escape hatches) and <code>contextSafe</code>. A <code>scope</code> signal that has not resolved
+    yet makes the callback wait, so a selector never escapes to the whole document; it runs as soon
+    as the element exists.
   </p>
 
   <h3>contextSafe</h3>
@@ -70,6 +78,14 @@
 
   <h2>provideGsap</h2>
   <app-code-preview [code]="provideGsap" />
+  <p>
+    The configuration is also available as the <code>GSAP_CONFIG</code> injection token, and the
+    router one as <code>GSAP_ROUTE_TRANSITIONS</code>. Every option and handle type is exported
+    (<code>GsapConfig</code>, <code>InjectGsapOptions</code>, <code>GsapHandle</code>,
+    <code>GsapScope</code>, <code>AnimationSignals</code>, <code>ScrollTriggerHandle</code>,
+    <code>RouteTransitionContext</code>, <code>GsapRouteTransitionsConfig</code> and the rest) and
+    covered by the same SemVer promise as the functions.
+  </p>
 
   <h2>animationSignals</h2>
   <app-code-preview [code]="animationSignals" />
@@ -85,6 +101,12 @@
   <h2>ng-gsap/scroll-trigger</h2>
   <app-code-preview [code]="scrollTrigger" />
   <p>
+    A <code>trigger</code> signal is waited for, then the trigger re-creates itself whenever the
+    element changes. An <code>animation</code> you pass in stays yours: a re-created or destroyed
+    trigger stops driving it but never kills it, so create it inside <code>injectGSAP</code> and let
+    the context revert it.
+  </p>
+  <p>
     Where ScrollTrigger cannot run — during SSR, or under jsdom, neither of which has layout to
     measure — the handle stays inert and <code>isSupported</code> is <code>false</code>, rather than
     throwing. Components that use it stay unit-testable.
@@ -92,6 +114,12 @@
 
   <h2>ng-gsap/router</h2>
   <app-code-preview [code]="router" />
+  <p>
+    The <code>leave</code> snapshot is removed when its animation completes, reverse-completes or is
+    killed; an animation that is already finished when you return it removes it at once. Callbacks
+    you set on your own animation (<code>onComplete</code> and friends) keep running, with their
+    params and <code>callbackScope</code> intact.
+  </p>
 
   <h2>ng-gsap/testing</h2>
   <app-code-preview [code]="testing" />

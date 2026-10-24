@@ -51,10 +51,14 @@ protected scroll = injectScrollTrigger({
 const ROUTER = `import { provideGsapRouteTransitions } from 'ng-gsap/router';
 
 provideGsapRouteTransitions({
-  // depth 0 is the top-level outlet, 1 a view inside it, and so on
+  // the context is { element, depth, from, to }:
+  // depth 0 is the top-level outlet, 1 a view inside it, and so on;
+  // from and to are the URLs being left and entered
   enter: ({ element, depth }) =>
     gsap.from(element, { autoAlpha: 0, y: depth === 0 ? 24 : 12, duration: 0.4 }),
   leave: ({ element }) => gsap.to(element, { autoAlpha: 0, duration: 0.3 }),
+  skipInitialTransition: true,     // default: the first view the app renders isn't animated
+  outletSelector: 'router-outlet', // default: narrow it only for sibling outlets at one level
 });`;
 
 const TESTING = `import { advanceGsap, provideGsapTesting } from 'ng-gsap/testing';

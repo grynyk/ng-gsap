@@ -122,15 +122,26 @@ describe('injectGSAP', () => {
       expect(callback).toHaveBeenCalled();
     });
 
-    it('runs unscoped when the scope signal has not resolved yet', async () => {
+    it('waits for a scope signal to resolve rather than running unscoped', async () => {
       const injector: Injector = TestBed.inject(Injector);
-      const scope = signal<ElementRef<Element> | undefined>(undefined);
-      const callback = vi.fn();
+      const host = document.createElement('div');
+      host.innerHTML = '<div class="late"></div>';
+      document.body.appendChild(host);
+      const scope = signal<Element | undefined>(undefined);
+      const callback = vi.fn(() => void gsap.to('.late', { x: 10, duration: 1 }));
 
       TestBed.runInInjectionContext(() => injectGSAP(callback, { scope, injector }));
       TestBed.tick();
 
-      expect(callback).toHaveBeenCalled();
+      // Running now would let '.late' match anywhere in the document.
+      expect(callback).not.toHaveBeenCalled();
+
+      scope.set(host);
+      TestBed.tick();
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(gsap.getTweensOf(host.querySelector('.late')).length).toBe(1);
+      host.remove();
     });
   });
 

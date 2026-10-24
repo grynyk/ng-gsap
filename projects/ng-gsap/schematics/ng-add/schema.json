@@ -12,7 +12,7 @@
     "plugins": {
       "type": "boolean",
       "default": false,
-      "description": "Also register ScrollTrigger and import it from ng-gsap/scroll-trigger.",
+      "description": "Also register the ScrollTrigger plugin, imported from gsap/ScrollTrigger.",
       "x-prompt": "Register the ScrollTrigger plugin?"
     },
     "respectReducedMotion": {

@@ -122,8 +122,16 @@ time to establish — keep that kind.
 Branch from `main`, keep the working tree green, and describe what you verified. If you changed
 anything animation-timing related, say which of the verification commands you ran.
 
-Releases are tag-driven: `release.yml` refuses to publish when the tag and the version in
-`projects/ng-gsap/package.json` disagree.
+### Releasing
+
+1. Set the version in `projects/ng-gsap/package.json` and add the `CHANGELOG.md` section.
+2. Commit, tag that commit `vX.Y.Z`, push the tag. `release.yml` refuses to publish when the tag and
+   the package version disagree, and runs every verification command before `npm publish`.
+3. Authentication is npm [trusted publishing](https://docs.npmjs.com/trusted-publishers): on
+   npmjs.com the package trusts `grynyk/ng-gsap` + `release.yml` through GitHub's OIDC token, so there
+   is no token to store or rotate, and provenance is attached automatically. A pre-release version
+   (`1.1.0-beta.1`) is published under the `next` dist-tag. A version that already exists on npm is
+   skipped, so re-running a failed release is safe.
 
 The public API is stable as of 1.0.0. Anything that changes the signature, return type or observable
 behaviour of a documented export is a breaking change and waits for a major — including the optional

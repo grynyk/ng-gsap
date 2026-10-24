@@ -31,14 +31,19 @@
   <h2>What <code>scope</code> does</h2>
   <p>
     <code>scope</code> confines every selector string used inside the callback to that element, so
-    <code>'.box'</code> can never reach into another component. Pass a <code>viewChild()</code>
-    signal and it resolves once the view exists. You can skip it entirely if you pass real elements
-    to GSAP instead of selector strings.
+    <code>'.box'</code> can never reach into another component. Pass a
+    <code>viewChild()</code> signal and the callback waits until it resolves, then runs; an optional
+    view child that is not on screen yet never lets a selector escape to the whole page. You can
+    skip <code>scope</code>
+    entirely if you pass real elements to GSAP instead of selector strings.
   </p>
 
   <h2>Where to go next</h2>
   <ul>
-    <li><a routerLink="/docs/api">API reference</a> — all four exports and both entry points.</li>
+    <li>
+      <a routerLink="/docs/api">API reference</a> — every export, across the main and the three
+      optional entry points.
+    </li>
     <li>
       <a routerLink="/docs/guides">Guides</a> — SSR, testing, route transitions, reduced motion.
     </li>

@@ -1,6 +1,7 @@
 import type { ElementRef } from '@angular/core';
 import { Component, Injector, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { gsap } from 'gsap';
 import { createMatchMediaStub, replaceMatchMedia } from '../../spec-helpers/match-media';
 import { injectScrollTrigger } from './inject-scroll-trigger';
 
@@ -88,16 +89,48 @@ describe('injectScrollTrigger', () => {
       element.remove();
     });
 
-    it('still creates a trigger when the target signal has not resolved', () => {
+    it('waits for a target signal to resolve before creating a trigger', () => {
       const injector: Injector = TestBed.inject(Injector);
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      const trigger = signal<Element | undefined>(undefined);
 
-      const scroll = injectScrollTrigger({ trigger: signal(undefined), injector });
+      const scroll = injectScrollTrigger({ trigger, injector });
       TestBed.tick();
 
-      // No element means ScrollTrigger falls back to its own default target
-      // rather than the handle failing outright.
+      // Creating now would quietly track ScrollTrigger's default target instead.
       expect(scroll.isSupported).toBe(true);
-      expect(scroll.instance()).toBeTruthy();
+      expect(scroll.instance()).toBeUndefined();
+
+      trigger.set(element);
+      TestBed.tick();
+
+      expect(scroll.instance()?.trigger).toBe(element);
+      element.remove();
+    });
+
+    it('leaves the animation it drives alive when the trigger element changes', () => {
+      const injector: Injector = TestBed.inject(Injector);
+      const first = document.createElement('div');
+      const second = document.createElement('div');
+      document.body.append(first, second);
+      const trigger = signal<Element>(first);
+      const animation = gsap.to({}, { duration: 1, paused: true });
+
+      const scroll = injectScrollTrigger({ trigger, animation, injector });
+      TestBed.tick();
+      expect(scroll.instance()?.animation).toBe(animation);
+
+      trigger.set(second);
+      TestBed.tick();
+
+      // ScrollTrigger.kill() kills the animation too by default, which would
+      // hand the re-created trigger a dead one. A killed tween has no parent.
+      expect(scroll.instance()?.trigger).toBe(second);
+      expect(animation.parent).toBeTruthy();
+      animation.kill();
+      first.remove();
+      second.remove();
     });
 
     it('creates a trigger when no target is given at all', () => {

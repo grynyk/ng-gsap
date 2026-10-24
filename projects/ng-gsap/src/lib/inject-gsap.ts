@@ -17,6 +17,10 @@ export interface InjectGsapOptions {
    * Element — or a signal of one, e.g. from `viewChild()` — that scopes every
    * selector string used inside the callback, so `'.box'` only ever matches
    * inside this component.
+   *
+   * A signal that hasn't resolved yet (an optional `viewChild()` inside an
+   * `@if`, say) makes the callback wait: it runs as soon as the element exists
+   * rather than running unscoped against the whole document.
    */
   scope?: GsapScope;
   /** Required only when calling outside an injection context. */
@@ -91,10 +95,15 @@ export function injectGSAP(
   afterRenderEffect(
     {
       write: (onCleanup) => {
-        const ctx = gsap.context(
-          (self) => callback(self as gsap.Context),
-          resolveScope(options.scope),
-        );
+        const scope = resolveScope(options.scope);
+        // An unresolved scope signal would leave every selector matching the
+        // whole document. Reading it above made it a dependency, so this simply
+        // runs once the element exists.
+        if (isSignal(options.scope) && !scope) {
+          return;
+        }
+
+        const ctx = gsap.context((self) => callback(self as gsap.Context), scope);
         activeContext = ctx;
         context.set(ctx);
 

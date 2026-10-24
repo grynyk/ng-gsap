@@ -146,6 +146,61 @@ describe('provideGsapRouteTransitions — edge cases', () => {
     expect(snapshotsInDocument()).toBe(0);
   });
 
+  it('removes the snapshot when the leave animation is killed before it finishes', async () => {
+    let animation: gsap.core.Tween | undefined;
+    const { navigate } = await setup({
+      leave: ({ element }) => (animation = gsap.to(element, { opacity: 0, duration: 3 })),
+    });
+
+    await navigate('/alpha');
+    await navigate('/beta');
+    expect(snapshotsInDocument()).toBeGreaterThan(0);
+
+    // A `gsap.context` revert or `killTweensOf` does this to an in-flight leave.
+    // `onComplete` then never fires, so the ghost would stay up for good.
+    animation?.kill();
+
+    expect(snapshotsInDocument()).toBe(0);
+  });
+
+  it('removes the snapshot at once when the leave animation has already finished', async () => {
+    const { navigate } = await setup({
+      leave: ({ element }) => gsap.to(element, { opacity: 0, duration: 1 }).progress(1),
+    });
+
+    await navigate('/alpha');
+    await navigate('/beta');
+
+    expect(snapshotsInDocument()).toBe(0);
+  });
+
+  it('removes the snapshot at once when the leave animation is reversed and already at its start', async () => {
+    const { navigate } = await setup({
+      leave: ({ element }) => gsap.to(element, { opacity: 0, duration: 1 }).reverse(),
+    });
+
+    await navigate('/alpha');
+    await navigate('/beta');
+
+    expect(snapshotsInDocument()).toBe(0);
+  });
+
+  it('keeps the caller’s own onComplete on a leave animation', async () => {
+    const onComplete = vi.fn();
+    let animation: gsap.core.Tween | undefined;
+    const { navigate } = await setup({
+      leave: ({ element }) =>
+        (animation = gsap.to(element, { opacity: 0, duration: 1, onComplete })),
+    });
+
+    await navigate('/alpha');
+    await navigate('/beta');
+    animation?.progress(1);
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(snapshotsInDocument()).toBe(0);
+  });
+
   it('does not leak snapshots across many navigations', async () => {
     const { navigate } = await setup({
       leave: ({ element }) => gsap.to(element, { opacity: 0, duration: 0.05 }),

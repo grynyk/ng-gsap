@@ -14,13 +14,16 @@ beforeEach(() => {
   TestBed.configureTestingModule({ providers: [provideGsapTesting()] });
 });
 
-it('animates the box', () => {
+it('slides the box open', async () => {
+  // Box animates '.box' with { x: 220, duration: 1, ease: 'none' } while open
   const fixture = TestBed.createComponent(Box);
+  fixture.componentInstance.open.set(true);
   fixture.detectChanges();
+  await fixture.whenStable(); // the render effect has run, the tween exists
 
   advanceGsap(500);
 
-  expect(gsap.getProperty('.box', 'x')).toBe(110);
+  expect(gsap.getProperty('.box', 'x')).toBe(110); // halfway, exactly, every run
 });`;
 
 const ROUTER = `import { provideGsapRouteTransitions } from 'ng-gsap/router';
