@@ -129,9 +129,17 @@ anything animation-timing related, say which of the verification commands you ra
    the package version disagree, and runs every verification command before `npm publish`.
 3. Authentication is npm [trusted publishing](https://docs.npmjs.com/trusted-publishers): on
    npmjs.com the package trusts `grynyk/ng-gsap` + `release.yml` through GitHub's OIDC token, so there
-   is no token to store or rotate, and provenance is attached automatically. A pre-release version
-   (`1.1.0-beta.1`) is published under the `next` dist-tag. A version that already exists on npm is
-   skipped, so re-running a failed release is safe.
+   is no token to store or rotate. A pre-release version (`1.1.0-beta.1`) is published under the
+   `next` dist-tag. A version that already exists on npm is skipped, so re-running a failed release is
+   safe.
+
+   Trusted publishing can only be configured for a package that already exists, so the very first
+   version is published by the same workflow with an `NPM_TOKEN` repository secret instead: a
+   granular access token, read and write on all packages, "bypass 2FA" enabled, shortest expiry.
+   Once that run succeeds, register the trusted publisher (`npm trust github ng-gsap --file
+   release.yml --repo grynyk/ng-gsap --allow-publish`), delete the secret and revoke the token. npm
+   removes a trusted-publisher configuration that has not published within 2 days of being created,
+   so register it right before the next tag push.
 
 The public API is stable as of 1.0.0. Anything that changes the signature, return type or observable
 behaviour of a documented export is a breaking change and waits for a major — including the optional

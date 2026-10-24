@@ -66,15 +66,27 @@ jobs:
       - name: Verify the package from outside
         run: yarn verify:package
 
-      # Authentication is npm trusted publishing: the registry trusts this
-      # repository's release.yml via GitHub's OIDC token, so there is no npm
-      # token to store or rotate, and provenance is attached automatically.
+      # Two ways to authenticate; npm itself tries them in this order:
+      #
+      # 1. Trusted publishing (OIDC). Once the package exists on npm, register
+      #    this workflow as its trusted publisher, either in the package
+      #    settings on npmjs.com or with
+      #      npm trust github ng-gsap --file release.yml --repo grynyk/ng-gsap --allow-publish
+      #    No token to store or rotate.
+      # 2. An NPM_TOKEN repository secret: a granular access token with read
+      #    and write access to all packages and "bypass 2FA" enabled. Trusted
+      #    publishing cannot be configured for a package that does not exist
+      #    yet, so this is how the very first version gets out. Delete the
+      #    secret and revoke the token as soon as trusted publishing is set up.
+      #
+      # --provenance attaches a signed build attestation on both paths.
       #
       # A version that already exists is skipped rather than failed, so
-      # re-running a release after a transient failure is safe, and so is the
-      # tag for a version that had to be published by hand.
+      # re-running a release after a transient failure is safe.
       - name: Publish to npm
         working-directory: dist/ng-gsap
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           VERSION=$(node -p "require('./package.json').version")
           if [ -n "$(npm view "ng-gsap@$VERSION" version 2>/dev/null)" ]; then
@@ -85,4 +97,4 @@ jobs:
             *-*) DIST_TAG="--tag next" ;; # pre-releases must never become `latest`
             *) DIST_TAG="" ;;
           esac
-          npm publish --access public $DIST_TAG
+          npm publish --access public --provenance $DIST_TAG
