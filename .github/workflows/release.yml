@@ -83,12 +83,13 @@ jobs:
       #    until trusted publishing is registered; delete the secret and
       #    revoke the token then.
       #
-      # A package that does not exist yet is a special case: the registry
-      # refuses to let a token create one with a direct publish, and a trusted
-      # publisher cannot be registered before the package exists. `npm stage
-      # publish` creates it and queues the version; a maintainer approves it
-      # once, with 2FA, on npmjs.com (Staged Packages) or with
-      # `npm stage approve <stage-id>`. Every later version publishes directly.
+      # The very first version is a special case: a trusted publisher cannot
+      # be registered before the package exists, so only the token path can
+      # create it. The token must allow "All packages" (one limited to a scope
+      # cannot create an unscoped name). If the registry still refuses the
+      # direct publish, fall back to `npm stage publish`, which creates the
+      # package and queues the version for a maintainer to approve once, with
+      # 2FA, on npmjs.com (Staged Packages) or via `npm stage approve <id>`.
       #
       # --provenance attaches a signed build attestation on every path.
       #
@@ -108,9 +109,13 @@ jobs:
             *-*) DIST_TAG="--tag next" ;; # pre-releases must never become `latest`
             *) DIST_TAG="" ;;
           esac
-          if [ -z "$(npm view ng-gsap name 2>/dev/null)" ]; then
-            npm stage publish --access public --provenance $DIST_TAG
-            echo "::notice::ng-gsap@$VERSION is staged. Approve it on npmjs.com under Staged Packages, or run: npm stage approve <stage-id>"
+          if npm publish --access public --provenance $DIST_TAG; then
             exit 0
           fi
-          npm publish --access public --provenance $DIST_TAG
+          if [ -n "$(npm view ng-gsap name 2>/dev/null)" ]; then
+            echo "::error::Direct publish of ng-gsap@$VERSION was refused and the package already exists; check the token or the trusted publisher."
+            exit 1
+          fi
+          echo "::warning::Direct publish was refused for a package that does not exist yet; staging it instead."
+          npm stage publish --access public --provenance $DIST_TAG
+          echo "::notice::ng-gsap@$VERSION is staged. Approve it on npmjs.com under Staged Packages, or run: npm stage approve <stage-id>"
