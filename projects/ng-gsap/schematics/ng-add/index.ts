@@ -23,7 +23,7 @@ function readVersion(tree: Tree): string {
 
 /**
  * Adds `gsap` as a real dependency. It is a peer dependency of ng-gsap and is
- * deliberately never bundled, so a fresh install needs it explicitly.
+ * deliberately never bundled,so a fresh install needs it explicitly.
  */
 function installGsap(options: NgAddOptions): Rule {
   return (tree: Tree) =>
