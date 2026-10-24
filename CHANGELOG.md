@@ -3,13 +3,13 @@
 All notable changes to `ng-gsap` are documented here. This project follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Until 1.0.0 the public API may still change: a breaking change to a documented export can land in any
-0.x release and is always called out here. That covers every entry point — `ng-gsap`,
-`ng-gsap/router`, `ng-gsap/scroll-trigger` and `ng-gsap/testing` — and the exported tokens and types.
+From 1.0.0 the public API is stable: no breaking change to any documented export lands outside a major
+release. That covers every entry point — `ng-gsap`, `ng-gsap/router`, `ng-gsap/scroll-trigger` and
+`ng-gsap/testing` — and the exported tokens and types.
 
-## [0.0.5] — 2026-10-24
+## [1.0.0] — 2026-10-24
 
-First public release.
+First stable release.
 
 ### Added
 
@@ -59,4 +59,4 @@ First public release.
   Chromium, prerendered server output, the production build driven in a browser, and the published
   tarball installed into a freshly generated Angular application.
 
-[0.0.5]: https://github.com/grynyk/ng-gsap/releases/tag/v0.0.5
+[1.0.0]: https://github.com/grynyk/ng-gsap/releases/tag/v1.0.0

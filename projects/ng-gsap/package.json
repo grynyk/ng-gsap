@@ -1,6 +1,6 @@
 {
   "name": "ng-gsap",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "Signals-first GSAP for Angular: auto-tracked dependencies, automatic cleanup, SSR-safe.",
   "keywords": [
     "angular",

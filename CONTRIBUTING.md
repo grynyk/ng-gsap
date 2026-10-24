@@ -145,6 +145,6 @@ anything animation-timing related, say which of the verification commands you ra
    configuration that has not published within 2 days of being created, so register it right before
    the next tag push.
 
-The public API is not frozen until 1.0.0. Anything that changes the signature, return type or
-observable behaviour of a documented export is still a breaking change — including the optional entry
-points — and must be called out under its own heading in the changelog. Add a `CHANGELOG.md` entry with every user-visible change.
+The public API is stable as of 1.0.0. Anything that changes the signature, return type or observable
+behaviour of a documented export is a breaking change and waits for a major — including the optional
+entry points. Add a `CHANGELOG.md` entry with every user-visible change.
