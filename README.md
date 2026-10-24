@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/ng-gsap?color=%23e40035&label=npm)](https://www.npmjs.com/package/ng-gsap)
 [![CI](https://github.com/grynyk/ng-gsap/actions/workflows/ci.yml/badge.svg)](https://github.com/grynyk/ng-gsap/actions/workflows/ci.yml)
-[![license](https://img.shields.io/npm/l/ng-gsap?color=%237c4dff)](LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-7c4dff)](https://github.com/grynyk/ng-gsap/blob/main/LICENSE)
 
 **Signals-first [GSAP](https://gsap.com) for Angular.** No dependency array, no teardown, SSR-safe by
 construction.
