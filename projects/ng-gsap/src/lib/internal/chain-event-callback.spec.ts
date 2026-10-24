@@ -21,8 +21,7 @@ describe('chainEventCallback', () => {
 
   it('hands gsap’s params and callback scope to the caller’s original callback', () => {
     const scope = { owner: true };
-    let seenThis: unknown;
-    let seenArgs: unknown[] = [];
+    const existing = vi.fn();
     const tween = gsap.to(
       {},
       {
@@ -30,18 +29,15 @@ describe('chainEventCallback', () => {
         paused: true,
         callbackScope: scope,
         onUpdateParams: ['first', 2],
-        onUpdate(this: unknown, ...args: unknown[]) {
-          seenThis = this;
-          seenArgs = args;
-        },
+        onUpdate: existing,
       },
     );
 
     chainEventCallback(tween, 'onUpdate', () => undefined);
     tween.progress(0.5);
 
-    expect(seenThis).toBe(scope);
-    expect(seenArgs).toEqual(['first', 2]);
+    expect(existing).toHaveBeenCalledWith('first', 2);
+    expect(existing.mock.contexts[0]).toBe(scope);
     tween.kill();
   });
 

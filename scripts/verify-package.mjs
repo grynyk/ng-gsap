@@ -99,34 +99,23 @@ export class App {
 `,
   );
 
+  // The generated config's exact shape is the CLI's business. Editing its
+  // providers array by string surgery once silently no-op'd, which left this
+  // entry point unverified while the script still reported success. A sibling
+  // export resolves ng-gsap/router against the published exports map and
+  // types regardless of how the CLI lays the file out.
   const appConfig = await readFile(join(app, 'src/app/app.config.ts'), 'utf-8');
-  const patchedConfig = appConfig
-    .replace(
-      "import { provideGsap } from 'ng-gsap';",
-      "import { provideGsap } from 'ng-gsap';\nimport { provideGsapRouteTransitions } from 'ng-gsap/router';\nimport { gsap } from 'gsap';",
-    )
-    .replace(
-      /\n\s*\]\s*\n\};?\s*$/,
-      `,
-    provideGsapRouteTransitions({
-      enter: ({ element }) => gsap.from(element, { autoAlpha: 0, duration: 0.3 }),
-    }),
-  ],
-};
+  await writeFile(
+    join(app, 'src/app/app.config.ts'),
+    `${appConfig}
+import { provideGsapRouteTransitions } from 'ng-gsap/router';
+import { gsap as gsapCore } from 'gsap';
+
+export const routeTransitions = provideGsapRouteTransitions({
+  enter: ({ element }) => gsapCore.from(element, { autoAlpha: 0, duration: 0.3 }),
+});
 `,
-    );
-  // Both replacements are string surgery on generated code. If the CLI's output
-  // shape changes they silently no-op, and the router entry point would go
-  // unverified while this script still reports success.
-  if (
-    !patchedConfig.includes("from 'ng-gsap/router'") ||
-    !patchedConfig.includes('provideGsapRouteTransitions({')
-  ) {
-    throw new Error(
-      'Could not patch app.config.ts to use ng-gsap/router; the generated config shape has changed',
-    );
-  }
-  await writeFile(join(app, 'src/app/app.config.ts'), patchedConfig);
+  );
 
   step('Building the consumer application');
   run('npx', ['ng', 'build'], app);
