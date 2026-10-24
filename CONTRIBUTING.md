@@ -133,13 +133,17 @@ anything animation-timing related, say which of the verification commands you ra
    `next` dist-tag. A version that already exists on npm is skipped, so re-running a failed release is
    safe.
 
-   Trusted publishing can only be configured for a package that already exists, so the very first
-   version is published by the same workflow with an `NPM_TOKEN` repository secret instead: a
-   granular access token, read and write on all packages, "bypass 2FA" enabled, shortest expiry.
-   Once that run succeeds, register the trusted publisher (`npm trust github ng-gsap --file
-   release.yml --repo grynyk/ng-gsap --allow-publish`), delete the secret and revoke the token. npm
-   removes a trusted-publisher configuration that has not published within 2 days of being created,
-   so register it right before the next tag push.
+   Trusted publishing can only be configured for a package that already exists, and the registry
+   does not let a token create one with a direct publish either. So the very first version goes
+   through [staged publishing](https://docs.npmjs.com/staged-publishing): the same workflow,
+   authenticated with an `NPM_TOKEN` repository secret (a granular access token, "Read and write
+   (publish and stage)" on all packages, shortest expiry), runs `npm stage publish`, which creates
+   the package and queues the version. A maintainer then approves it once, with 2FA, under Staged
+   Packages on npmjs.com or with `npm stage approve <stage-id>` (npm 11.15+). After that, register
+   the trusted publisher (`npm trust github ng-gsap --file release.yml --repo grynyk/ng-gsap
+   --allow-publish`), delete the secret and revoke the token. npm removes a trusted-publisher
+   configuration that has not published within 2 days of being created, so register it right before
+   the next tag push.
 
 The public API is stable as of 1.0.0. Anything that changes the signature, return type or observable
 behaviour of a documented export is a breaking change and waits for a major — including the optional

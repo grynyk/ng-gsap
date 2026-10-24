@@ -66,6 +66,11 @@ jobs:
       - name: Verify the package from outside
         run: yarn verify:package
 
+      # `npm stage` (used below for the very first version) needs npm 11.15+;
+      # Node 24 ships 11.6.
+      - name: Update npm
+        run: npm install -g npm@11 && npm --version
+
       # Two ways to authenticate; npm itself tries them in this order:
       #
       # 1. Trusted publishing (OIDC). Once the package exists on npm, register
@@ -73,13 +78,19 @@ jobs:
       #    settings on npmjs.com or with
       #      npm trust github ng-gsap --file release.yml --repo grynyk/ng-gsap --allow-publish
       #    No token to store or rotate.
-      # 2. An NPM_TOKEN repository secret: a granular access token with read
-      #    and write access to all packages and "bypass 2FA" enabled. Trusted
-      #    publishing cannot be configured for a package that does not exist
-      #    yet, so this is how the very first version gets out. Delete the
-      #    secret and revoke the token as soon as trusted publishing is set up.
+      # 2. An NPM_TOKEN repository secret: a granular access token with
+      #    "Read and write (publish and stage)" on all packages. Only needed
+      #    until trusted publishing is registered; delete the secret and
+      #    revoke the token then.
       #
-      # --provenance attaches a signed build attestation on both paths.
+      # A package that does not exist yet is a special case: the registry
+      # refuses to let a token create one with a direct publish, and a trusted
+      # publisher cannot be registered before the package exists. `npm stage
+      # publish` creates it and queues the version; a maintainer approves it
+      # once, with 2FA, on npmjs.com (Staged Packages) or with
+      # `npm stage approve <stage-id>`. Every later version publishes directly.
+      #
+      # --provenance attaches a signed build attestation on every path.
       #
       # A version that already exists is skipped rather than failed, so
       # re-running a release after a transient failure is safe.
@@ -97,4 +108,9 @@ jobs:
             *-*) DIST_TAG="--tag next" ;; # pre-releases must never become `latest`
             *) DIST_TAG="" ;;
           esac
+          if [ -z "$(npm view ng-gsap name 2>/dev/null)" ]; then
+            npm stage publish --access public --provenance $DIST_TAG
+            echo "::notice::ng-gsap@$VERSION is staged. Approve it on npmjs.com under Staged Packages, or run: npm stage approve <stage-id>"
+            exit 0
+          fi
           npm publish --access public --provenance $DIST_TAG
