@@ -7,6 +7,13 @@ From 1.0.0 the public API is stable: no breaking change to any documented export
 release. That covers every entry point — `ng-gsap`, `ng-gsap/router`, `ng-gsap/scroll-trigger` and
 `ng-gsap/testing` — and the exported tokens and types.
 
+## [1.0.1] — 2026-10-24
+
+### Changed
+
+- README: a compatibility table for Angular and `gsap` versions, a static license badge (the
+  npm-backed one could show "package not found") and a green version badge. No code changes.
+
 ## [1.0.0] — 2026-10-24
 
 First stable release.
@@ -59,4 +66,5 @@ First stable release.
   Chromium, prerendered server output, the production build driven in a browser, and the published
   tarball installed into a freshly generated Angular application.
 
+[1.0.1]: https://github.com/grynyk/ng-gsap/releases/tag/v1.0.1
 [1.0.0]: https://github.com/grynyk/ng-gsap/releases/tag/v1.0.0

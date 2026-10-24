@@ -9,8 +9,12 @@ construction.
 
 **[Documentation and live examples →](https://grynyk.github.io/ng-gsap/)**
 
-Requires Angular **22+** and `gsap` **3.12+**, both peer dependencies. Bring your own `gsap` install;
-this package never bundles it.
+| ng-gsap | Angular | gsap  |
+| ------- | ------- | ----- |
+| 1.x     | 22+     | 3.12+ |
+
+Angular and `gsap` are both peer dependencies. Bring your own `gsap` install; this package never
+bundles it.
 
 Stable since 1.0.0 and versioned with [SemVer](https://semver.org): no breaking change to a documented
 export lands outside a major release, across every entry point.
