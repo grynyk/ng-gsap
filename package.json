@@ -20,7 +20,6 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
-  "private": true,
   "packageManager": "yarn@4.18.0",
   "dependencies": {
     "@angular/common": "^22.1.0",
