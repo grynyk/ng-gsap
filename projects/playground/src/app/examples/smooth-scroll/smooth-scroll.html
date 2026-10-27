@@ -1,0 +1,30 @@
+<app-example-page title="Smooth scrolling" source="smooth-scroll" entryPoint="ng-gsap">
+  <p>
+    <a href="https://github.com/darkroomengineering/lenis" target="_blank" rel="noopener">Lenis</a>
+    is a separate smooth-scroll library, not part of GSAP. It keeps the page's native scroll, so
+    ScrollTrigger works with it unchanged once two things are wired up: Lenis runs on GSAP's ticker,
+    and every Lenis scroll event calls <code>ScrollTrigger.update</code>. It is running on this page
+    only, for as long as the page is open. Turn it off and scroll again to feel the difference.
+  </p>
+
+  <div class="controls">
+    <button class="btn btn-accent" type="button" (click)="toggle()" [attr.aria-pressed]="smooth()">
+      <span>Smooth scrolling: {{ smooth() ? 'on' : 'off' }}</span>
+    </button>
+  </div>
+
+  <div class="scenes" #scene>
+    @for (item of scenes; track item.label) {
+      <section class="scene">
+        <div class="layer orb" data-depth="1"></div>
+        <div class="layer orb small" data-depth="2"></div>
+        <div class="layer copy" data-depth="0.5">
+          <h2>{{ item.label }}</h2>
+          <p>{{ item.caption }}</p>
+        </div>
+      </section>
+    }
+  </div>
+
+  <app-code-preview [code]="snippet" />
+</app-example-page>

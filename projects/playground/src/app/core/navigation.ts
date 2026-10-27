@@ -32,7 +32,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
       {
         path: '/docs/guides',
         label: 'Guides',
-        summary: 'SSR, testing, route transitions, reduced motion',
+        summary: 'SSR, testing, route transitions, reduced motion, smooth scrolling',
       },
     ],
   },
@@ -78,6 +78,11 @@ export const NAV_SECTIONS: readonly NavSection[] = [
         path: '/scroll-pin',
         label: 'Pinned scroll story',
         summary: 'A pinned section whose chapters read progress() directly',
+      },
+      {
+        path: '/smooth-scroll',
+        label: 'Smooth scrolling',
+        summary: "Lenis on GSAP's ticker, kept in sync with ScrollTrigger",
       },
     ],
   },

@@ -7,6 +7,8 @@
 **Signals-first [GSAP](https://gsap.com) for Angular.** No dependency array, no teardown, SSR-safe by
 construction.
 
+*Keywords: Angular GSAP, gsap/angular, ng-gsap, ngx-gsap.*
+
 - **Docs and live examples:** https://grynyk.github.io/ng-gsap/
 - **npm:** https://www.npmjs.com/package/ng-gsap
 

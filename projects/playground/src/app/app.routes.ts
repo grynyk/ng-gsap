@@ -48,6 +48,11 @@ export const routes: Routes = [
     loadComponent: () => import('./examples/scroll-pin/scroll-pin').then((m) => m.ScrollPin),
   },
   {
+    path: 'smooth-scroll',
+    loadComponent: () =>
+      import('./examples/smooth-scroll/smooth-scroll').then((m) => m.SmoothScroll),
+  },
+  {
     path: 'text-reveal',
     loadComponent: () => import('./examples/text-reveal/text-reveal').then((m) => m.TextReveal),
   },

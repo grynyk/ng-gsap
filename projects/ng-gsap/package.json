@@ -11,7 +11,11 @@
     "zoneless",
     "ssr",
     "scroll",
-    "route-transitions"
+    "route-transitions",
+    "angular-gsap",
+    "gsap-angular",
+    "ng-gsap",
+    "ngx-gsap"
   ],
   "license": "MIT",
   "publishConfig": {

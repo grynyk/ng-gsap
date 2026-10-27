@@ -1,6 +1,6 @@
 <app-doc-page
   title="Guides"
-  lede="The four things people ask about after the first animation works."
+  lede="The five things people ask about after the first animation works."
 >
   <h2>Server-side rendering</h2>
   <p>
@@ -66,4 +66,30 @@
     callbacks still fire, and ScrollTrigger still scrubs. It reacts to the setting changing
     mid-session and restores normal playback on teardown.
   </p>
+
+  <h2>Smooth scrolling</h2>
+  <p>
+    ng-gsap ships no smooth-scroll wrapper. The wiring is short enough to own. With
+    <a href="https://github.com/darkroomengineering/lenis" target="_blank" rel="noopener">Lenis</a>,
+    a separate library that keeps the page's native scroll, ScrollTrigger needs two things: Lenis
+    must run on GSAP's ticker so both update in the same frame, and every Lenis scroll event must
+    call <code>ScrollTrigger.update</code>. Put this in your root component to enable it app-wide:
+  </p>
+  <app-code-preview [code]="smoothScroll" title="app.ts" />
+  <p>
+    Add <code>node_modules/lenis/dist/lenis.css</code> to the <code>styles</code> array in
+    <code>angular.json</code>. <code>lagSmoothing(0)</code> stops GSAP from adjusting its clock
+    after a long frame, which would otherwise let Lenis and ScrollTrigger drift apart. Restoring
+    GSAP's defaults on teardown matters when Lenis lives in a single page rather than the root, as
+    it does in the <a routerLink="/smooth-scroll">smooth scrolling example</a>. Lenis honours
+    <code>prefers-reduced-motion</code> by default, so it pairs with
+    <code>respectReducedMotion</code> without extra code.
+  </p>
+  <div class="note">
+    <p>
+      If you would rather stay inside GSAP, its own <code>ScrollSmoother</code> plugin ships in the
+      <code>gsap</code> package. It needs a wrapper and a content element around the page instead of
+      keeping native scroll.
+    </p>
+  </div>
 </app-doc-page>

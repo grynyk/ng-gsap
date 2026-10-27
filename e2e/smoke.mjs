@@ -93,6 +93,7 @@ try {
     ['/list', 'Signal-driven list'],
     ['/scroll-progress', 'ScrollTrigger progress'],
     ['/scroll-pin', 'Pinned scroll story'],
+    ['/smooth-scroll', 'Smooth scrolling'],
     ['/text-reveal', 'Text reveal'],
     ['/flip-grid', 'Flip grid'],
     ['/svg-draw', 'SVG draw-in'],
@@ -158,6 +159,28 @@ try {
   await settle(600);
   const textAfter = await page.locator('main').innerText();
   check('ScrollTrigger updates signals on scroll', textBefore !== textAfter);
+
+  // Lenis lives exactly as long as the toggle and the page do. It tags <html>
+  // with a `lenis` class while running, which makes its lifetime observable.
+  await page.goto(`${BASE}/smooth-scroll`, { waitUntil: 'networkidle' });
+  await settle(400);
+  const lenisRunning = () =>
+    page.evaluate(() => document.documentElement.classList.contains('lenis'));
+  const startedOnLoad = await lenisRunning();
+  await page.locator('.controls .btn').click();
+  await settle(300);
+  const stoppedByToggle = !(await lenisRunning());
+  await page.locator('.controls .btn').click();
+  await settle(300);
+  const restartedByToggle = await lenisRunning();
+  await page.locator('nav a', { hasText: 'Pinned scroll story' }).first().click();
+  await settle(600);
+  const stoppedOnLeave = !(await lenisRunning());
+  check(
+    'Lenis follows the toggle and is torn down on navigation',
+    startedOnLoad && stoppedByToggle && restartedByToggle && stoppedOnLeave,
+    `load=${startedOnLoad} off=${stoppedByToggle} on=${restartedByToggle} leave=${stoppedOnLeave}`,
+  );
 
   // DrawSVGPlugin writes an animating dasharray.
   await page.goto(`${BASE}/svg-draw`, { waitUntil: 'domcontentloaded' });

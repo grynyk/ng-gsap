@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+.controls {
+  position: sticky;
+  top: 1rem;
+  z-index: 1;
+  margin-bottom: 1rem;
+}
+
+.scenes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.scene {
+  position: relative;
+  height: 70vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+}
+
+.orb {
+  position: absolute;
+  top: 55%;
+  left: 12%;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 50%;
+  background: var(--gradient);
+  opacity: 0.18;
+
+  &.small {
+    top: 70%;
+    left: auto;
+    right: 14%;
+    width: 7rem;
+    height: 7rem;
+    opacity: 0.35;
+  }
+}
+
+.copy {
+  position: relative;
+  text-align: center;
+
+  h2 {
+    margin: 0;
+    font-size: 2.4rem;
+  }
+
+  p {
+    margin: 0.4rem 0 0;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+}

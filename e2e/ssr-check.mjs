@@ -26,6 +26,7 @@ const EXPECTED_ROUTES = [
   ['list', 'Signal-driven list'],
   ['scroll-progress', 'ScrollTrigger progress'],
   ['scroll-pin', 'Pinned scroll story'],
+  ['smooth-scroll', 'Smooth scrolling'],
   ['text-reveal', 'Text reveal'],
   ['flip-grid', 'Flip grid'],
   ['svg-draw', 'SVG draw-in'],

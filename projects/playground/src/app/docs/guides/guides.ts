@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CodePreview } from '../../shared/code-preview/code-preview';
 import { DocPage } from '../../shared/doc-page/doc-page';
 
@@ -39,9 +40,34 @@ providers: [
 
 const REDUCED_MOTION = `provideGsap({ respectReducedMotion: true });`;
 
+const SMOOTH_SCROLL = `import { afterRenderEffect } from '@angular/core';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
+
+export class App {
+  constructor() {
+    // Render effects never run on the server, so Lenis is never constructed there.
+    afterRenderEffect((onCleanup) => {
+      const lenis = new Lenis();
+      const stopSync = lenis.on('scroll', ScrollTrigger.update);
+      const tick = (time: number) => lenis.raf(time * 1000); // ticker time is in seconds
+      gsap.ticker.add(tick);
+      gsap.ticker.lagSmoothing(0);
+
+      onCleanup(() => {
+        gsap.ticker.remove(tick);
+        gsap.ticker.lagSmoothing(500, 33); // GSAP's defaults
+        stopSync();
+        lenis.destroy();
+      });
+    });
+  }
+}`;
+
 @Component({
   selector: 'app-guides',
-  imports: [DocPage, CodePreview],
+  imports: [DocPage, CodePreview, RouterLink],
   templateUrl: './guides.html',
 })
 export class Guides {
@@ -49,4 +75,5 @@ export class Guides {
   protected readonly testing = TESTING;
   protected readonly router = ROUTER;
   protected readonly reducedMotion = REDUCED_MOTION;
+  protected readonly smoothScroll = SMOOTH_SCROLL;
 }
